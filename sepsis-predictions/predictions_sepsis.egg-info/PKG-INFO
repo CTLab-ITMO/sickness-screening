@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: predictions-sepsis
+Version: 0.0.1
+Summary: Module for sepsis_predictions
+Home-page: https://github.com/sslavian812/sepsis-predictions
+Author: @Margo78, @akp1n
+Author-email: timtimk30@yandex.ru
+License: UNKNOWN
+Project-URL: Documentation, link
+Description: UNKNOWN
+Keywords: example python
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.11
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
