@@ -9,11 +9,11 @@ def combine_diagnoses_and_ssir(gotten_diagnoses_csv='gottenDiagnoses.csv', has_s
                                ssir_csv='ssir.csv', title_column='long_title', subject_id_column='subject_id',
                                output_sepsis_information_df='sepsis_info_df.csv', disease_str='sepsis', has_temp=True,
                                temp_col1='Temperature Fahrenheit', temp_col2='Temperature Celsius',
-                               translate_function=fahrenheit_to_celsius, value_column='valueom', log_stats=True,
+                               translate_function=fahrenheit_to_celsius, value_column='valueuom', log_stats=True,
                                output_file='diagnoses_and_ssir.csv'):
     """
-    Combine diagnoses and SSIR data, translate temperature from Fahrenheit to Celsius (or any other value if needed),
-    and log statistics about sepsis patients. 
+    Combines diagnoses and SSIR data, translate temperature from Fahrenheit to Celsius (or any other value if needed),
+    and log statistics about sepsis patients.
     Also, it could be possible to combine any other csv data frames as long as both of them have specified columns.
     First should have title_column and subject_id, second data_frame should have at least subject_id column.
     Output file will have boolean value about long_title containing disease_str value.
