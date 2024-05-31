@@ -21,7 +21,6 @@ def get_diagnoses(patient_diagnoses_csv='diagnoses.csv', all_diagnoses_csv='d_ic
     diagnos_results = df_diagnos[df_diagnos[diagnoses_code_column].isin(df_d_diagnos[diagnoses_code_column])]
     diagnos_results = diagnos_results.merge(df_d_diagnos[[diagnoses_code_column, title_column]],
                                             on=diagnoses_code_column)
-    print(diagnos_results.columns)
     diagnos_results = diagnos_results[[subject_id_column, title_column]]
     diagnos_results.to_csv(output_file_csv, index=False)
 
