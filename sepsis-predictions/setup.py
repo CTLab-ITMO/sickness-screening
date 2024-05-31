@@ -16,7 +16,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         'requests>=2.25.1',
-        'pandas>=1.0.0'
+        'pandas>=1.0.0',
+        'numpy>=1.0.0',
+        'scikit-learn>=1.0.0'
     ],
     classifiers=[
         'Programming Language :: Python :: 3.11',
