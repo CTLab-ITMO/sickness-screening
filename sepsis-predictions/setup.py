@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='predictions_sepsis',
-    version='0.0.6',
+    version='1.0.2',
     author='@Margo78, @akp1n',
     author_email='timtimk30@yandex.ru',
     description='Module for sepsis predictions',
@@ -16,9 +16,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         'requests>=2.25.1',
-        'pandas>=1.0.0',
-        'numpy>=1.0.0',
-        'scikit-learn>=1.0.0'
+        'pandas>=1.3.3',
+        'tqdm>=4.62.3',
+        'numpy>=1.21.2',
+        'scikit-learn>=0.24.2',
+        'imbalanced-learn>=0.8.0',
+        'pytorch-tabnet>=3.1.1',
+        'torch>=1.9.0'
     ],
     classifiers=[
         'Programming Language :: Python :: 3.11',
