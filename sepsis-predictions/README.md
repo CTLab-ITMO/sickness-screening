@@ -117,7 +117,7 @@ model = ps.train_model(df_to_train_csv='filled_data.csv',
                        test_size=0.2)
 ```
 
-##### Second way
+## Second way
 #### Collecting features of the dataset
 ```python
 with open(file_path) as f:
