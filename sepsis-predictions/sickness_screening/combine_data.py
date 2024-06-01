@@ -5,12 +5,12 @@ def fahrenheit_to_celsius(f):
     return (f - 32) * 5.0 / 9.0
 
 
-def combine_diagnoses_and_ssir(gotten_diagnoses_csv='gottenDiagnoses.csv', has_sepsis_column='has_sepsis',
-                               ssir_csv='ssir.csv', title_column='long_title', subject_id_column='subject_id',
-                               output_sepsis_information_df='sepsis_info_df.csv', disease_str='sepsis', has_temp=True,
-                               temp_col1='Temperature Fahrenheit', temp_col2='Temperature Celsius',
-                               translate_function=fahrenheit_to_celsius, value_column='valueuom', log_stats=True,
-                               output_file='diagnoses_and_ssir.csv'):
+def combine_data(gotten_diagnoses_csv='gottenDiagnoses.csv', has_sepsis_column='has_sepsis',
+                 ssir_csv='ssir.csv', title_column='long_title', subject_id_column='subject_id',
+                 output_sepsis_information_df='sepsis_info_df.csv', disease_str='sepsis', has_temp=True,
+                 temp_col1='Temperature Fahrenheit', temp_col2='Temperature Celsius',
+                 translate_function=fahrenheit_to_celsius, value_column='valueuom', log_stats=True,
+                 output_file='diagnoses_and_ssir.csv'):
     """
     Combines diagnoses and SSIR data, translate temperature from Fahrenheit to Celsius (or any other value if needed),
     and log statistics about sepsis patients.

@@ -12,11 +12,11 @@ The module also allows users to change different names of tables to aggregate da
 To install the module, use the following command:
 
 ```bash
-pip install predictions-sepsis
+pip install sickness-screening
 ```
 or
 ```bash
-pip3 install predictions-sepsis
+pip3 install sickness-screening
 ```
 ### Usage
 
@@ -27,36 +27,36 @@ fill empty spots, compress data between patients, and train your model.
 
 #### Aggregate patient diagnoses Data
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.get_diagnoses(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
+ss.get_diagnoses_data(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
                  all_diagnoses_csv='path_to_all_diagnoses.csv',
                  output_file_csv='gottenDiagnoses.csv')
 ```
 
 #### Aggregate patient ssir Data
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.get_ssir(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
+ss.get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
              charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
              itemids=None, rest_columns=None, output_csv='ssir.csv'):
 ```
 
 #### Combine Diagnoses and SSIR Data
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.combine_diagnoses_and_ssir(gotten_diagnoses_csv='gottenDiagnoses.csv', 
+ss.combine_data(gotten_diagnoses_csv='gottenDiagnoses.csv', 
                               ssir_csv='path_to_ssir.csv',
                               output_file='diagnoses_and_ssir.csv')
 ```
 
 #### Aggregate patient blood analysis data from chartevents.csv and labevents.csv and combine it with diagnoses and SSIR Data
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.merge_diagnoses_and_ssir_with_blood(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
+ss.merge_diagnoses_and_ssir_with_blood(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
                                        blood_csv='path_to_blood.csv',
                                        chartevents_csv='path_to_chartevents.csv',
                                        output_csv='merged_data.csv')
@@ -65,46 +65,46 @@ ps.merge_diagnoses_and_ssir_with_blood(diagnoses_and_ssir_csv='diagnoses_and_ssi
 
 #### Compress Data by patient
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.compress(df_to_compress='balanced_data.csv', 
+ss.compress(df_to_compress='balanced_data.csv', 
             output_csv='compressed_data.csv')
 
 ```
 
 #### Choose top non-sepsis patients to balance
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.choose(compressed_df_csv='compressed_data.csv', 
+ss.choose(compressed_df_csv='compressed_data.csv', 
           output_file='final_balanced_data.csv')
 ```
 
 #### Fill missing values with mode
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.fill_values(balanced_csv='final_balanced_data.csv', 
+ss.fill_values(balanced_csv='final_balanced_data.csv', 
                strategy='most_frequent', 
                output_csv='filled_data.csv')
 ```
 
 #### Aggregate patient diagnoses Data
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
 # Aggregate diagnoses data
-ps.get_diagnoses(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
+ss.get_diagnoses(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
                  all_diagnoses_csv='path_to_all_diagnoses.csv',
                  output_file_csv='gottenDiagnoses.csv')
 ```
 
 #### Train model
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
-model = ps.train_model(df_to_train_csv='filled_data.csv', 
+model = ss.train_model(df_to_train_csv='filled_data.csv', 
                        categorical_col=['Large Platelets'], 
                        columns_to_train_on=['Amylase'], 
                        model=RandomForestClassifier(), 

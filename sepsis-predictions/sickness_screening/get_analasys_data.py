@@ -1,9 +1,9 @@
 import pandas as pd
 
 
-def get_ssir(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
-             charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
-             itemids=None, rest_columns=None, output_csv='ssir.csv'):
+def get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
+                      charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
+                      itemids=None, rest_columns=None, output_csv='ssir.csv'):
     """
         Extracts specific item IDs from chartevents data, pivots the table, and saves the result to a CSV file.
         This function reads chartevents data from a CSV file, filters it based on specified item IDs, pivots the table to

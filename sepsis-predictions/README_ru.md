@@ -35,7 +35,7 @@ ps.get_diagnoses(patient_diagnoses_csv='path_to_patient_diagnoses.csv',
 ```python
 import predictions_sepsis as ps
 
-ps.get_ssir(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
+ps.get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
              charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
              itemids=None, rest_columns=None, output_csv='ssir.csv')
 ```

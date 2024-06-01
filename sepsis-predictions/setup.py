@@ -5,8 +5,8 @@ def readme():
         return f.read()
 
 setup(
-    name='predictions_sepsis',
-    version='1.0.3',
+    name='sickness_screening',
+    version='1.0.0',
     author='@Margo78, @akp1n',
     author_email='timtimk30@yandex.ru',
     description='Module for sepsis predictions',
@@ -22,13 +22,14 @@ setup(
         'scikit-learn>=0.24.2',
         'imbalanced-learn>=0.8.0',
         'pytorch-tabnet>=3.1.1',
-        'torch>=1.9.0'
+        'torch>=1.9.0',
+        'nona>=0.0.2'
     ],
     classifiers=[
         'Programming Language :: Python :: 3.11',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent'
     ],
-    keywords='sepsis, predictions, python',
+    keywords='sepsis, predictions, python, disease, screening',
     python_requires='>=3.7'
 )

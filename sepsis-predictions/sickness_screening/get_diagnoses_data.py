@@ -1,7 +1,7 @@
 import pandas as pd
-def get_diagnoses(patient_diagnoses_csv='diagnoses.csv', all_diagnoses_csv='d_icd_diagnoses.csv',
-                  diagnoses_code_column='icd_code', title_column='long_title', subject_id_column='subject_id',
-                  output_file_csv='gottenDiagnoses.csv'):
+def get_diagnoses_data(patient_diagnoses_csv='diagnoses.csv', all_diagnoses_csv='d_icd_diagnoses.csv',
+                       diagnoses_code_column='icd_code', title_column='long_title', subject_id_column='subject_id',
+                       output_file_csv='gottenDiagnoses.csv'):
     """
     Extracts and merges patient diagnosis data with a general diagnosis reference and saves the result to a CSV file.
 
@@ -25,4 +25,4 @@ def get_diagnoses(patient_diagnoses_csv='diagnoses.csv', all_diagnoses_csv='d_ic
     diagnos_results.to_csv(output_file_csv, index=False)
 
 
-get_diagnoses()
+get_diagnoses_data()
