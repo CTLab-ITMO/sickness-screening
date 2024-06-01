@@ -56,7 +56,7 @@ ss.combine_data(gotten_diagnoses_csv='gottenDiagnoses.csv',
 ```python
 import sickness_screening as ss
 
-ss.merge_diagnoses_and_ssir_with_blood(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
+ss.merge_and_get_data(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
                                        blood_csv='path_to_blood.csv',
                                        chartevents_csv='path_to_chartevents.csv',
                                        output_csv='merged_data.csv')
@@ -87,16 +87,6 @@ import sickness_screening as ss
 ss.fill_values(balanced_csv='final_balanced_data.csv', 
                strategy='most_frequent', 
                output_csv='filled_data.csv')
-```
-
-#### Aggregate patient diagnoses Data
-```python
-import sickness_screening as ss
-
-# Aggregate diagnoses data
-ss.get_diagnoses(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
-                 all_diagnoses_csv='path_to_all_diagnoses.csv',
-                 output_file_csv='gottenDiagnoses.csv')
 ```
 
 #### Train model

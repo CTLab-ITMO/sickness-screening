@@ -25,35 +25,35 @@ pip3 install predictions-sepsis
 
 #### Аггрегирование данных о диагнозах пациентов:
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.get_diagnoses(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
+ss.get_diagnoses_data(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
                  all_diagnoses_csv='path_to_all_diagnoses.csv',
                  output_file_csv='gottenDiagnoses.csv')
 ```
 #### Аггрегирование данных, необходимых для нахождения ССВР (синдром системной воспалительной рекции)
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
+ss.get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
              charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
              itemids=None, rest_columns=None, output_csv='ssir.csv')
 ```
 
 #### Комбинирование данных о диагнозах и ССВР
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.combine_diagnoses_and_ssir(gotten_diagnoses_csv='gottenDiagnoses.csv', 
+ss.combine_data(gotten_diagnoses_csv='gottenDiagnoses.csv', 
                               ssir_csv='path_to_ssir.csv',
                               output_file='diagnoses_and_ssir.csv')
 ```
 
 #### Сбор и комбинирование данных об анализах крови, с данными об диагнозах и ССВР
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.merge_diagnoses_and_ssir_with_blood(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
+ss.merge_and_get_data(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
                                        blood_csv='path_to_blood.csv',
                                        chartevents_csv='path_to_chartevents.csv',
                                        output_csv='merged_data.csv')
@@ -61,38 +61,38 @@ ps.merge_diagnoses_and_ssir_with_blood(diagnoses_and_ssir_csv='diagnoses_and_ssi
 
 #### Компрессия данных о каждом пациенте (если в наборе данных пропуски, то внутри каждого пациента пропуски заполнятся значением из этого пациента)
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.compress(df_to_compress='diagnoses_and_ssir_and_blood_and_chartevents.csv', subject_id_col='subject_id',
-             output_csv='compressed.csv')
+ss.compress(df_to_compress='balanced_data.csv', 
+            output_csv='compressed_data.csv')
 
 ```
 
 #### Выбрать лучших пациентов с данными для балансировки
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.choose(compressed_df_csv='compressed_data.csv', 
+ss.choose(compressed_df_csv='compressed_data.csv', 
           output_file='final_balanced_data.csv')
 ```
 
 #### Заполнение пропущенных значений модой
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 
-ps.fill_values(balanced_csv='final_balanced_data.csv', 
+ss.fill_values(balanced_csv='final_balanced_data.csv', 
                strategy='most_frequent', 
                output_csv='filled_data.csv')
 ```
 
 #### Тренировка модели на наборе данных.
 ```python
-import predictions_sepsis as ps
+import sickness_screening as ss
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
-model = ps.train_model(df_to_train_csv='filled_data.csv', 
-                       categorical_col=['Large Platelets'], #Категориальная колонка
-                       columns_to_train_on=['Amylase'], #Числовая колонка
+model = ss.train_model(df_to_train_csv='filled_data.csv', 
+                       categorical_col=['Large Platelets'], 
+                       columns_to_train_on=['Amylase'], 
                        model=RandomForestClassifier(), 
                        single_cat_column='White Blood Cells', 
                        has_disease_col='has_sepsis', 
