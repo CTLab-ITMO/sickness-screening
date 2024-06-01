@@ -103,8 +103,8 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
                        test_size=0.2)
 ```
 
-## Second way
-#### Collecting features of the dataset
+## Второй способ
+#### Собираем признаки в датасет
 ```python
 with open(file_path) as f:
     headers = f.readline().replace('\n', '').split(',')
@@ -126,13 +126,13 @@ table['subject_id'] = table.index
 table.to_csv(output_path, index=False)
 ```
 
-#### Add a target to the dataset
+#### Добавляем таргет
 ```python
 target_subjects = drgcodes.loc[drgcodes['drg_code'].isin([870, 871, 872]), 'subject_id']
 merged_data.loc[merged_data['subject_id'].isin(target_subjects), 'diagnosis'] = 1
 ```
 
-#### Filling in the blanks using the NoNa library
+#### Заполнение пробелов с помощью библиотеки NoNa
 ```python
 nona(
     data=X,
@@ -141,13 +141,13 @@ nona(
 )
 ```
 
-#### Removing class imbalance using SMOTE
+#### Устранение дисбаланса классов с помощью SMOTE
 ```python
 smote = SMOTE(random_state=random_state)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 ```
 
-#### Train model TabNet
+#### Обучаем модель TabNet
 ```python
 unsupervised_model = TabNetPretrainer(
     optimizer_fn=torch.optim.Adam,
@@ -179,7 +179,7 @@ clf.fit(
 )
 ```
 
-#### Looking at the metrics
+#### Смотрим полученные метрики
 ```python
 result = loaded_clf.predict(X_test.values)
 accuracy = (result == y_test.values).mean()
