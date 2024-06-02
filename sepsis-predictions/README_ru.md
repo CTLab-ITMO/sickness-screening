@@ -122,8 +122,6 @@ with open(file_path) as f:
 
 table = pd.DataFrame.from_dict(result, orient='index')
 table['subject_id'] = table.index
-
-table.to_csv(output_path, index=False)
 ```
 
 #### Добавляем таргет
