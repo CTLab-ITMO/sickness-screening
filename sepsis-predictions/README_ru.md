@@ -102,13 +102,14 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
                        random_state=42, 
                        test_size=0.2)
 ```
-#### Можно вставить такие модели, как CatBoostClassifier или SVC с разными ядрами:
+#### Можно вставить такие модели, как CatBoostClassifier или SVC с разными ядрами
+CatBoostClassifier:
 ```python
 class_weights = {0: 1, 1: 15}
 clf = CatBoostClassifier(loss_function='MultiClassOneVsAll', class_weights=class_weights, iterations=50, learning_rate=0.1, depth=5)
 clf.fit(X_train, y_train)
 ```
-
+SVC с использованием гауссова ядра с радиальной базовой функцией (RBF):
 ```python
 class_weights = {0: 1, 1: 13}
 param_dist = {
