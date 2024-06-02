@@ -111,22 +111,26 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
 * Частота дыхания
 * Температура
 ```python
-with open(file_path) as f:
-    headers = f.readline().replace('\n', '').split(',')
-    i = 0
-    for line in tqdm(f):
-        values = line.replace('\n', '').split(',')
-        subject_id = values[0]
-        item_id = values[6]
-        valuenum = values[8]
-        if item_id in item_ids_set:
-            if subject_id not in result:
-                result[subject_id] = {}
-            result[subject_id][item_id] = valuenum
-        i += 1
+  item_ids_set = set(item_ids)
 
-table = pd.DataFrame.from_dict(result, orient='index')
-table['subject_id'] = table.index
+  with open(file_path) as f:
+      headers = f.readline().replace('\n', '').split(',')
+      i = 0
+      for line in tqdm(f):
+          values = line.replace('\n', '').split(',')
+          subject_id = values[0]
+          item_id = values[6]
+          valuenum = values[8]
+          if item_id in item_ids_set:
+              if subject_id not in result:
+                  result[subject_id] = {}
+              result[subject_id][item_id] = valuenum
+          i += 1
+  
+  table = pd.DataFrame.from_dict(result, orient='index')
+  table['subject_id'] = table.index
+
+item_ids = [str(x) for x in [225309, 220045, 220210, 223762]]
 ```
 
 #### Добавляем таргет
@@ -135,7 +139,7 @@ target_subjects = drgcodes.loc[drgcodes['drg_code'].isin([870, 871, 872]), 'subj
 merged_data.loc[merged_data['subject_id'].isin(target_subjects), 'diagnosis'] = 1
 ```
 
-#### Заполнение пробелов с помощью библиотеки NoNa
+#### Заполнение пробелов с помощью библиотеки NoNa. Данный алгоритм заполняет пропуски различными методами машинного обучения, мы используем StandardScaler, Ridge и RandomForestClassifier
 ```python
 nona(
     data=X,
@@ -150,7 +154,7 @@ smote = SMOTE(random_state=random_state)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 ```
 
-#### Обучаем модель TabNet
+#### Обучаем модель TabNet. TabNet - это расширение pyTorch. Сначала импользуем полуконтролируемое предварительное обучение с помощью TabNetPretrainer, а далее создаём и обучаем модель классификации с использованием TabNetClassifier
 ```python
 unsupervised_model = TabNetPretrainer(
     optimizer_fn=torch.optim.Adam,
@@ -190,3 +194,4 @@ precision = precision_score(y_test.values, result)
 recall = recall_score(y_test.values, result)
 f1 = f1_score(y_test.values, result)
 ```
+#### Была произведена визуализация по 2 PCA компонентам
