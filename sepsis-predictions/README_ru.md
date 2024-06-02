@@ -102,6 +102,7 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
                        random_state=42, 
                        test_size=0.2)
 ```
+
 #### Например, можно вставить такие модели, как CatBoostClassifier или SVC с разными ядрами
 CatBoostClassifier:
 ```python
@@ -130,7 +131,7 @@ random_search = RandomizedSearchCV(
 ```
 
 ## Второй способ (трансформеры TabNet и DeepFM)
-### Собираем признаки в датасет. 
+### Собираем признаки в датасет 
 #### Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
 * Частота сердцебиения
@@ -210,6 +211,7 @@ clf.fit(
     patience=patience,
     from_unsupervised=unsupervised_model
 )
+
 ```
 #### Обучаем модель DeepFM
 ```python
@@ -222,6 +224,7 @@ deepfm.fit(train_data, verbose=2, shuffle=True, eval_data=eval_data,
            metrics=["loss", "balanced_accuracy", "roc_auc", "pr_auc",
                     "precision", "recall", "map", "ndcg"])
 ```
+
 #### Смотрим полученные метрики
 ```python
 result = loaded_clf.predict(X_test.values)
@@ -230,6 +233,7 @@ precision = precision_score(y_test.values, result)
 recall = recall_score(y_test.values, result)
 f1 = f1_score(y_test.values, result)
 ```
+
 #### Была произведена визуализация по 2 PCA компонентам
 ![Image alt](./Визуализация_2_PCA_компоненты.png)
 Распределение по компонентам представлено ниже:
@@ -243,6 +247,7 @@ f1 = f1_score(y_test.values, result)
 | MEWS             |           -0.000660           |            0.003313           |
 
 Найти закономерностей не получилось.
+
 #### Обучен вариационный кодировщик для построения разделимого 2D пространства.
 ![Image alt](./Вариационный_кодировщик.png)
 Можем заметить, что они накладываются друг на друга и неразделимы.
