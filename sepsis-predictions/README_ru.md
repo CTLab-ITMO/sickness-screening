@@ -195,4 +195,4 @@ recall = recall_score(y_test.values, result)
 f1 = f1_score(y_test.values, result)
 ```
 #### Была произведена визуализация по 2 PCA компонентам
-![Image alt]([https://github.com/jon/coolproject/raw/master/image/image.png](https://github.com/sslavian812/sepsis-predictions/edit/master/sepsis-predictions/Визуализация_2_PCA_компоненты.png)
+![Image alt](https://github.com/sslavian812/sepsis-predictions/edit/master/sepsis-predictions/Визуализация_2_PCA_компоненты.png)
