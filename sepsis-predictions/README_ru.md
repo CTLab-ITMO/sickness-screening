@@ -129,7 +129,7 @@ random_search = RandomizedSearchCV(
 )
 ```
 
-## Второй способ (трансформер TabNet)
+## Второй способ (трансформеры TabNet и DeepFM)
 ### Собираем признаки в датасет. 
 #### Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
@@ -211,7 +211,17 @@ clf.fit(
     from_unsupervised=unsupervised_model
 )
 ```
+#### Обучаем модель DeepFM
+```python
+deepfm = DeepFM("ranking", data_info, embed_size=16, n_epochs=2,
+                lr=1e-4, lr_decay=False, reg=None, batch_size=1,
+                num_neg=1, use_bn=False, dropout_rate=None,
+                hidden_units="128,64,32", tf_sess_config=None)
 
+deepfm.fit(train_data, verbose=2, shuffle=True, eval_data=eval_data,
+           metrics=["loss", "balanced_accuracy", "roc_auc", "pr_auc",
+                    "precision", "recall", "map", "ndcg"])
+```
 #### Смотрим полученные метрики
 ```python
 result = loaded_clf.predict(X_test.values)
