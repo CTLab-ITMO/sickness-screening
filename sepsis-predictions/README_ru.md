@@ -102,8 +102,33 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
                        random_state=42, 
                        test_size=0.2)
 ```
+#### Можно вставить такие модели, как CatBoostClassifier или SVC с разными ядрами:
+```python
+class_weights = {0: 1, 1: 15}
+clf = CatBoostClassifier(loss_function='MultiClassOneVsAll', class_weights=class_weights, iterations=50, learning_rate=0.1, depth=5)
+clf.fit(X_train, y_train)
+```
 
-## Второй способ
+```python
+class_weights = {0: 1, 1: 13}
+param_dist = {
+    'C': reciprocal(0.1, 100),
+    'gamma': reciprocal(0.01, 10),
+    'kernel': ['rbf']
+}
+
+svm_model = SVC(class_weight=class_weights, random_state=42)
+random_search = RandomizedSearchCV(
+    svm_model,
+    param_distributions=param_dist,
+    n_iter=10,
+    cv=5,
+    scoring=make_scorer(recall_score, pos_label=1),
+    n_jobs=-1
+)
+```
+
+## Второй способ (трансформер TabNet)
 ### Собираем признаки в датасет. 
 #### Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
