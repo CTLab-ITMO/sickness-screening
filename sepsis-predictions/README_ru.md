@@ -195,6 +195,6 @@ recall = recall_score(y_test.values, result)
 f1 = f1_score(y_test.values, result)
 ```
 #### Была произведена визуализация по 2 PCA компонентам
-<div style="text-align: center;">
-    <img src="./Визуализация_2_PCA_компоненты.png" alt="Image alt" style="max-width: 50%; height: auto;">
-</div>
+![Image alt](./Визуализация_2_PCA_компоненты.png)
+Распределение по компонентам представлено ниже:
+
