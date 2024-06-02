@@ -107,36 +107,70 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
                        test_size=0.2)
 ```
 
-## Second way
-#### Collecting features of the dataset
+#### For example, you can insert models like CatBoostClassifier or SVC with different kernels.
+CatBoostClassifier:
 ```python
-with open(file_path) as f:
-    headers = f.readline().replace('\n', '').split(',')
-    i = 0
-    for line in tqdm(f):
-        values = line.replace('\n', '').split(',')
-        subject_id = values[0]
-        item_id = values[6]
-        valuenum = values[8]
-        if item_id in item_ids_set:
-            if subject_id not in result:
-                result[subject_id] = {}
-            result[subject_id][item_id] = valuenum
-        i += 1
+class_weights = {0: 1, 1: 15}
+clf = CatBoostClassifier(loss_function='MultiClassOneVsAll', class_weights=class_weights, iterations=50, learning_rate=0.1, depth=5)
+clf.fit(X_train, y_train)
+```
+SVC using Gaussian kernel with radial basis function (RBF):
+```python
+class_weights = {0: 1, 1: 13}
+param_dist = {
+    'C': reciprocal(0.1, 100),
+    'gamma': reciprocal(0.01, 10),
+    'kernel': ['rbf']
+}
 
-table = pd.DataFrame.from_dict(result, orient='index')
-table['subject_id'] = table.index
-
-table.to_csv(output_path, index=False)
+svm_model = SVC(class_weight=class_weights, random_state=42)
+random_search = RandomizedSearchCV(
+    svm_model,
+    param_distributions=param_dist,
+    n_iter=10,
+    cv=5,
+    scoring=make_scorer(recall_score, pos_label=1),
+    n_jobs=-1
+)
 ```
 
-#### Add a target to the dataset
+## The Second Method (Transformers TabNet and DeepFM)
+### Collecting features into a dataset
+#### You can choose any features, but we will take 4 as in MEWS (Modified Early Warning Score) to predict sepsis in the first hours of a patient's hospital stay:
+* Systolic blood pressure
+* Heart rate
+* Respiratory rate
+* Temperature
+```python
+  item_ids_set = set(item_ids)
+
+  with open(file_path) as f:
+      headers = f.readline().replace('\n', '').split(',')
+      i = 0
+      for line in tqdm(f):
+          values = line.replace('\n', '').split(',')
+          subject_id = values[0]
+          item_id = values[6]
+          valuenum = values[8]
+          if item_id in item_ids_set:
+              if subject_id not in result:
+                  result[subject_id] = {}
+              result[subject_id][item_id] = valuenum
+          i += 1
+  
+  table = pd.DataFrame.from_dict(result, orient='index')
+  table['subject_id'] = table.index
+
+item_ids = [str(x) for x in [225309, 220045, 220210, 223762]]
+```
+
+#### Adding the target
 ```python
 target_subjects = drgcodes.loc[drgcodes['drg_code'].isin([870, 871, 872]), 'subject_id']
 merged_data.loc[merged_data['subject_id'].isin(target_subjects), 'diagnosis'] = 1
 ```
 
-#### Filling in the blanks using the NoNa library
+#### Filling in gaps using the NoNa library. This algorithm fills in gaps using various machine learning methods, we use StandardScaler, Ridge and RandomForestClassifier
 ```python
 nona(
     data=X,
@@ -145,13 +179,13 @@ nona(
 )
 ```
 
-#### Removing class imbalance using SMOTE
+#### Addressing class imbalance using SMOTE
 ```python
 smote = SMOTE(random_state=random_state)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 ```
 
-#### Train model TabNet
+#### Training the TabNet model. TabNet is an extension of pyTorch. First, we use semi-supervised pretraining with TabNetPretrainer, then create and train a classification model using TabNetClassifier
 ```python
 unsupervised_model = TabNetPretrainer(
     optimizer_fn=torch.optim.Adam,
@@ -183,7 +217,19 @@ clf.fit(
 )
 ```
 
-#### Looking at the metrics
+#### Training the DeepFM model
+```python
+deepfm = DeepFM("ranking", data_info, embed_size=16, n_epochs=2,
+                lr=1e-4, lr_decay=False, reg=None, batch_size=1,
+                num_neg=1, use_bn=False, dropout_rate=None,
+                hidden_units="128,64,32", tf_sess_config=None)
+
+deepfm.fit(train_data, verbose=2, shuffle=True, eval_data=eval_data,
+           metrics=["loss", "balanced_accuracy", "roc_auc", "pr_auc",
+                    "precision", "recall", "map", "ndcg"])
+```
+
+#### Viewing the obtained metrics
 ```python
 result = loaded_clf.predict(X_test.values)
 accuracy = (result == y_test.values).mean()
@@ -191,3 +237,21 @@ precision = precision_score(y_test.values, result)
 recall = recall_score(y_test.values, result)
 f1 = f1_score(y_test.values, result)
 ```
+
+#### Visualization of 2 PCA components was performed
+![Image alt](./Визуализация_2_PCA_компоненты.png)
+The distribution by components is presented below:
+
+|                  |  Load on the first component  | Load on the second component  |
+| ---------------- | :---: | :---: |
+| Heart rate       |           -0.101450           |            0.991611           |
+| Temperature      |            0.001178           |            0.013098           |
+| Systolic BP      |            0.994771           |            0.100169           |
+| Respiratory rate |            0.011673           |            0.080573           |
+| MEWS             |           -0.000660           |            0.003313           |
+
+No patterns were found.
+
+#### A variational encoder was trained to build a separable 2D space
+![Image alt](./Вариационный_кодировщик.png)
+We can see that they overlap and are inseparable.
