@@ -1,4 +1,4 @@
-# Predictions sepsis
+# Disease-predictions module
 
 ## Instruction
 
