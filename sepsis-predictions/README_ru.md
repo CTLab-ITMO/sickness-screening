@@ -85,7 +85,7 @@ ss.fill_values(balanced_csv='final_balanced_data.csv',
                output_csv='filled_data.csv')
 ```
 
-#### Тренировка модели на наборе данных.
+#### Тренировка модели на наборе данных
 ```python
 import sickness_screening as ss
 from sklearn.ensemble import RandomForestClassifier
