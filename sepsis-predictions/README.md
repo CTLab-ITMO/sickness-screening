@@ -60,7 +60,6 @@ ss.merge_and_get_data(merge_with='diagnoses_and_ssir.csv',
                                        blood_csv='path_to_blood.csv',
                                        get_data_from='path_to_chartevents.csv',
                                        output_csv='merged_data.csv')
-)
 ```
 
 #### Compress Data by patient
