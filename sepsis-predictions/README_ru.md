@@ -35,17 +35,17 @@ ss.get_diagnoses_data(patient_diagnoses_csv='path_to_patient_diagnoses.csv',
 ```python
 import sickness_screening as ss
 
-ss.get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
-             charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
-             itemids=None, rest_columns=None, output_csv='ssir.csv')
+ss.get_analyzes_data(analyzes_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
+                      charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
+                      itemids=None, rest_columns=None, output_csv='ssir.csv')
 ```
 
 #### Комбинирование данных о диагнозах и ССВР
 ```python
 import sickness_screening as ss
 
-ss.combine_data(gotten_diagnoses_csv='gottenDiagnoses.csv', 
-                              ssir_csv='path_to_ssir.csv',
+ss.combine_data(first_data='gottenDiagnoses.csv', 
+                              second_data='ssir.csv',
                               output_file='diagnoses_and_ssir.csv')
 ```
 
@@ -53,9 +53,9 @@ ss.combine_data(gotten_diagnoses_csv='gottenDiagnoses.csv',
 ```python
 import sickness_screening as ss
 
-ss.merge_and_get_data(diagnoses_and_ssir_csv='diagnoses_and_ssir.csv', 
+ss.merge_and_get_data(merge_with='diagnoses_and_ssir.csv', 
                                        blood_csv='path_to_blood.csv',
-                                       chartevents_csv='path_to_chartevents.csv',
+                                       get_data_from='path_to_chartevents.csv',
                                        output_csv='merged_data.csv')
 ```
 
