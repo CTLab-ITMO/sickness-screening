@@ -1,4 +1,5 @@
-# Модуль Disease-predictions
+# Модуль Disease-predictions  
+[English](sepsis-predictions/README.md)
 
 ## Инструкция
 
