@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
+def get_analyzes_data(analyzes_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
                       charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
                       itemids=None, rest_columns=None, output_csv='ssir.csv'):
     """
@@ -10,7 +10,7 @@ def get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject
         have item IDs as columns, and saves the resulting data to a 'output_csv' file.
 
         Args:
-            chartevents_csv (str): Path to the CSV file containing chartevents data. Default is 'chartevents.csv'.
+            analyzes_csv (str): Path to the CSV file containing chartevents data. Default is 'chartevents.csv'.
             subject_id_col (str): Column name for subject IDs. Default is 'subject_id'.
             itemid_col (str): Column name for item IDs. Default is 'itemid'.
             charttime_col (str): Column name for chart times. Default is 'charttime'.
@@ -30,7 +30,7 @@ def get_analasys_data(chartevents_csv='chartevents.csv', subject_id_col='subject
                         'Temperature Fahrenheit_valueom', 'Temperature Celsius_valueom', 'Direct Bilurubin_valueom']
     if itemids is None:
         itemids = [220045, 220210, 223762, 223761, 225651]
-    chartevents_df = pd.read_csv(chartevents_csv,
+    chartevents_df = pd.read_csv(analyzes_csv,
                                  usecols=[subject_id_col, itemid_col, charttime_col, value_col, valuenum_col,
                                           valueuom_col])
 

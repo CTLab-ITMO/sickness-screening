@@ -1,29 +1,29 @@
 import pandas as pd
 
 
-def merge_diagnoses_and_ssir_with_blood(analysis_names=None, diagnoses_and_ssir_csv='diagnoses_and_ssir.csv',
-                                        blood_csv='labevents.csv', chartevents_csv='chartevents.csv',
-                                        output_csv='diagnoses_and_ssir_and_blood_and_chartevents.csv',
-                                        subject_id_column='subject_id',
-                                        charttime_column='charttime',
-                                        itemid_column='itemid',
-                                        has_sepsis_column='has_sepsis',
-                                        log_stats=True,
-                                        sepsis_info_df='sepsis_info_df.csv',
-                                        valueuom_column='valueuom'
-                                        ):
+def merge_and_get_data(analyzes_names=None, merge_with='diagnoses_and_ssir.csv',
+                       blood_csv='labevents.csv', get_data_from='chartevents.csv',
+                       output_csv='diagnoses_and_ssir_and_blood_and_chartevents.csv',
+                       subject_id_column='subject_id',
+                       time_column='charttime',
+                       itemid_column='itemid',
+                       has_sepsis_column='has_sepsis',
+                       log_stats=True,
+                       sepsis_info_df='sepsis_info_df.csv',
+                       valueuom_column='valueuom'
+                       ):
     """
         Merges diagnoses and SSIR data with blood and chartevents data, and logs statistics about sepsis patients.
         It is recommended to get file diagnoses_and_ssir by get_diagnoses and merge_diagnoses_and_ssir. 'sepsis_info_df' is recommended to be a path
         to a .csv file after 'get_disease_info' function.
         Args:
-            analysis_names (dict, optional): Dictionary mapping item IDs to analysis names. Default is None, in which case a predefined dictionary is used.
-            diagnoses_and_ssir_csv (str): Path to the CSV file containing diagnoses and SSIR data. Default is 'diagnoses_and_ssir.csv'.
+            analyzes_names (dict, optional): Dictionary mapping item IDs to analysis names. Default is None, in which case a predefined dictionary is used.
+            merge_with (str): Path to the CSV file containing diagnoses and SSIR data. Default is 'diagnoses_and_ssir.csv'.
             blood_csv (str): Path to the CSV file containing blood analysis data. Default is 'labevents.csv'.
-            chartevents_csv (str): Path to the CSV file containing chartevents data. Default is 'chartevents.csv'.
+            get_data_from (str): Path to the CSV file containing chartevents data. Default is 'chartevents.csv'.
             output_csv (str): Path to the output CSV file for combined data. Default is 'diagnoses_and_ssir_and_blood_and_chartevents.csv'.
             subject_id_column (str): Column name for subject IDs. Default is 'subject_id'.
-            charttime_column (str): Column name for chart times. Default is 'charttime'.
+            time_column (str): Column name for chart times. Default is 'charttime'.
             itemid_column (str): Column name for item IDs. Default is 'itemid'.
             has_sepsis_column (str): Column name to indicate sepsis presence. Default is 'has_sepsis'.
             log_stats (bool): Whether to log statistics about sepsis patients. Default is True.
@@ -32,8 +32,8 @@ def merge_diagnoses_and_ssir_with_blood(analysis_names=None, diagnoses_and_ssir_
         Returns:
             None: Writes the combined and processed data to the specified output file and logs statistics if required.
         """
-    if analysis_names is None:
-        analysis_names = {
+    if analyzes_names is None:
+        analyzes_names = {
             51222: "Hemoglobin",
             51279: "Red Blood Cell",
             51240: "Large Platelets",
@@ -58,37 +58,37 @@ def merge_diagnoses_and_ssir_with_blood(analysis_names=None, diagnoses_and_ssir_
             50912: "Creatinine",
             50920: "Estimated GFR (MDRD equation)"
         }
-    diagnoses_and_ssir = pd.read_csv(diagnoses_and_ssir_csv)
+    diagnoses_and_ssir = pd.read_csv(merge_with)
     blood = pd.read_csv(blood_csv)
-    chartevents = pd.read_csv(chartevents_csv)
+    chartevents = pd.read_csv(get_data_from)
 
-    blood['analysis_name'] = blood[itemid_column].map(analysis_names)
+    blood['analysis_name'] = blood[itemid_column].map(analyzes_names)
 
-    pivot_values_blood = blood.pivot_table(index=[subject_id_column, charttime_column], columns='analysis_name',
+    pivot_values_blood = blood.pivot_table(index=[subject_id_column, time_column], columns='analysis_name',
                                            values='value',
                                            aggfunc='first').reset_index()
-    pivot_uom_blood = blood.pivot_table(index=[subject_id_column, charttime_column], columns='analysis_name',
+    pivot_uom_blood = blood.pivot_table(index=[subject_id_column, time_column], columns='analysis_name',
                                         values= valueuom_column,
                                         aggfunc='first').reset_index()
-    chartevents_itemids = analysis_names
+    chartevents_itemids = analyzes_names
     chartevents['analysis_name'] = chartevents[itemid_column].map(chartevents_itemids)
 
-    pivot_values_chartevents = chartevents.pivot_table(index=[subject_id_column, charttime_column],
+    pivot_values_chartevents = chartevents.pivot_table(index=[subject_id_column, time_column],
                                                        columns='analysis_name',
                                                        values='value', aggfunc='first').reset_index()
-    pivot_uom_chartevents = chartevents.pivot_table(index=[subject_id_column, charttime_column],
+    pivot_uom_chartevents = chartevents.pivot_table(index=[subject_id_column, time_column],
                                                     columns='analysis_name',
                                                     values=valueuom_column, aggfunc='first').reset_index()
 
-    pivot_values = pd.merge(pivot_values_blood, pivot_values_chartevents, on=[subject_id_column, charttime_column],
+    pivot_values = pd.merge(pivot_values_blood, pivot_values_chartevents, on=[subject_id_column, time_column],
                             how='outer')
-    pivot_uom = pd.merge(pivot_uom_blood, pivot_uom_chartevents, on=[subject_id_column, charttime_column], how='outer')
+    pivot_uom = pd.merge(pivot_uom_blood, pivot_uom_chartevents, on=[subject_id_column, time_column], how='outer')
 
-    pivot_uom.columns = [f'{col}_{valueuom_column}' if col not in [subject_id_column, charttime_column] else col for col
+    pivot_uom.columns = [f'{col}_{valueuom_column}' if col not in [subject_id_column, time_column] else col for col
                          in
                          pivot_uom.columns]
-    pivot_df = pd.merge(pivot_values, pivot_uom, on=[subject_id_column, charttime_column], how='left')
-    merged_df = pd.merge(pivot_df, diagnoses_and_ssir, on=[subject_id_column, charttime_column], how='outer')
+    pivot_df = pd.merge(pivot_values, pivot_uom, on=[subject_id_column, time_column], how='left')
+    merged_df = pd.merge(pivot_df, diagnoses_and_ssir, on=[subject_id_column, time_column], how='outer')
     sepsis_info_df = pd.read_csv(sepsis_info_df)
     sepsis_map = sepsis_info_df.set_index(subject_id_column)[has_sepsis_column].to_dict()
     merged_df[has_sepsis_column] = merged_df[subject_id_column].map(sepsis_map)
