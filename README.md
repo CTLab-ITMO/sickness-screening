@@ -12,36 +12,63 @@
 Чтобы установить модуль, достаточно воспользоваться следующей командой:
 
 ```bash
-pip install predictions-sepsis
+pip install sickness-screening
 ```
 или
 ```bash
-pip3 install predictions-sepsis
+pip3 install sickness-screening
 ```
 ### Использование
 После импортирования модуля в своем файле появляется возможность взаимодействовать с различными медицинскими данными. 
 По умолчанию модуль настроен на набор данных MIMIC и предсказание сепсиса. 
 
-### Примеры
+## Примеры
+### Устройство MIMIC
+В примерах разберем, как с помощью модуля sickness-screening обучить модель предсказывать сепсис на наборе данных MIMIC.
+В MIMIC есть множество таблиц, но для примера нам потребуются следующие таблицы:
+1. **chartevents.csv** -- содержит данные мониторинга пациентов, например: температура тела, артериальное давление.
+2. **labevents.csv** -- содержит данные различных анализов пациентов, например различные характеристики анализов крови для пациентов.
+3. **diagnoses.csv** -- содержит информацию о диагнозах, которые получил пациент.
+4. **d_icd_diagnoses** -- расшифрофки кодов диагнозов для каждого диагноза.
+5. **d_labitems.csv** -- расшифрофки кодов анализов для каждого пациента. 
 
 #### Аггрегирование данных о диагнозах пациентов:
+Для начала соберем данные о диагнозах пациентов:
 ```python
 import sickness_screening as ss
 
-ss.get_diagnoses_data(patient_diagnoses_csv='path_to_patient_diagnoses.csv', 
-                 all_diagnoses_csv='path_to_all_diagnoses.csv',
+ss.get_diagnoses_data(patient_diagnoses_csv='diagnoses.csv', 
+                 all_diagnoses_csv='d_icd_diagnoses.csv',
                  output_file_csv='gottenDiagnoses.csv')
 ```
+Здесь мы для каждого пациента из **patient_diagnoses_csv** получаем коды диагнозов, а далее, используя **all_diagnoses_csv** 
+мы уже получаем файл **output_file_csv** в котором для каждого пациента уже хранится расшифровка его диагноза. 
+#### Получение данных о том, есть ли конкретный диагноз у пациента
+```python
+import sickness_screening as ss
+ss.get_diseas_info(diagnoses_csv='gottenDiagnoses.csv', title_column='long_title', diseas_str='sepsis',
+                    diseas_column='has_sepsis', subject_id_column='subject_id', log_stats=True,
+                    output_csv='sepsis_info.csv')
+```
+Здесь используем таблицу, которую мы получили из предыдущего примера, чтобы на выходе получить таблицу, в которой содержатся данные о том,
+был ли у этого человека в диагнозе продстрока sepsis, или нет. 
+
 #### Аггрегирование данных, необходимых для нахождения ССВР (синдром системной воспалительной рекции)
+Теперь соберем некоторые данные, необходимые для определения ССВР:
 ```python
 import sickness_screening as ss
 
 ss.get_analyzes_data(analyzes_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
-                      charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
-                      itemids=None, rest_columns=None, output_csv='ssir.csv')
+                      charttime_col='charttime', value_col='value', valuenum_col='valuenum',
+                      itemids=[220045, 220210, 223762, 223761, 225651], rest_columns=['Heart rate', 'Respiratory rate', 'Temperature Fahrenheit', 'Temperature Celsius',
+                        'Direct Bilurubin'], output_csv='ssir.csv')
 ```
-
+Здесь мы используя таблицу **analyzes_csv**, **itemids**(коды анализов, которые мы хотим собрать), **rest_columns**(колонки, которые мы хотим оставить в выходной таблице),
+Чтобы собрать из analyzes_csv замеры для пациентов с кодами **itemids** и записать их в **output_csv**, оставив только колонки, которые есть в **rest_columns**
+В данной функции **subject_id_col** и **itemid_col** отвечают за колонки, отведенные под коды пациентов и анализов соответсвенно.
+**charttime_col** отвечает за время. **valuenum_col** отвечает за колонку с единицами измерения анализов. 
 #### Комбинирование данных о диагнозах и ССВР
+Теперь скомбинируем данные из предыдущих двух примеров в одну таблицу:
 ```python
 import sickness_screening as ss
 
@@ -51,24 +78,48 @@ ss.combine_data(first_data='gottenDiagnoses.csv',
 ```
 
 #### Сбор и комбинирование данных об анализах крови, с данными об диагнозах и ССВР
+Соберем данные об анализах крови пациентов и скомбинируем их в одну таблицу:
 ```python
 import sickness_screening as ss
 
 ss.merge_and_get_data(merge_with='diagnoses_and_ssir.csv', 
-                                       blood_csv='path_to_blood.csv',
-                                       get_data_from='path_to_chartevents.csv',
-                                       output_csv='merged_data.csv')
+                      blood_csv='labevents.csv',
+                      get_data_from='chartevents.csv',
+                      output_csv='merged_data.csv',
+                      analyzes_names = {
+                        51222: "Hemoglobin",
+                        51279: "Red Blood Cell",
+                        51240: "Large Platelets",
+                        50861: "Alanine Aminotransferase (ALT)",
+                        50878: "Asparate Aminotransferase (AST)",
+                        225651: "Direct Bilirubin",
+                        50867: "Amylase",
+                        51301: "White Blood Cells"})
 ```
-
+Данная функция ищет данные об **analyzes_names** пациентов из таблиц **blood_csv.csv** и **get_data_from**, 
+комбинирует их вместе с **merge_with**. Стоит отметить, что эта функция также комбинирует данные о болезни каждого пациента. 
+#### Балансировка данных внутри каждого пациента:
+Сбалансируем данные по общему количеству строк для пациентов с сепсисом и без. 
+```python
+import sickness_screening as ss
+ss.balance_on_patients(balancing_csv='merged_data.csv', disease_col='has_sepsis', subject_id_col='subject_id',
+                        output_csv='balance.csv',
+                        output_filtered_csv='balance_filtered.csv',
+                        filtering_on=200,
+                        number_of_patient_selected=50000,
+                        log_stats=True
+                        )
+```
 #### Компрессия данных о каждом пациенте (если в наборе данных пропуски, то внутри каждого пациента пропуски заполнятся значением из этого пациента)
+Теперь заполним пропуски имеющимися данными для каждого пациента, не заполняя статистическими значениями или константами:
 ```python
 import sickness_screening as ss
 
 ss.compress(df_to_compress='balanced_data.csv', 
+            subject_id_col='subject_id',
             output_csv='compressed_data.csv')
 
 ```
-
 #### Выбрать лучших пациентов с данными для балансировки
 ```python
 import sickness_screening as ss
@@ -103,7 +154,8 @@ model = ss.train_model(df_to_train_csv='filled_data.csv',
                        random_state=42, 
                        test_size=0.2)
 ```
-
+В этой функции мы обучаем **RandomForestClassifier** из scikit-learn на наборе данных с одной категориальной колонкой, с одной числовой колонкой
+и с одной категориальной колонкой, которую можно преобразовать в числовую. В качестве метода нормализации используется **MinMaxScaler** из scikit-learn.
 #### Например, можно вставить такие модели, как CatBoostClassifier или SVC с разными ядрами
 CatBoostClassifier:
 ```python

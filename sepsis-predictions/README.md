@@ -40,7 +40,8 @@ import sickness_screening as ss
 
 ss.get_analyzes_data(analyzes_csv='chartevents.csv', subject_id_col='subject_id', itemid_col='itemid',
                       charttime_col='charttime', value_col='value', valuenum_col='valuenum', valueuom_col='valueuom',
-                      itemids=None, rest_columns=None, output_csv='ssir.csv')
+                      itemids=[220045, 220210, 223762, 223761, 225651], rest_columns=['Heart rate', 'Respiratory rate', 'Temperature Fahrenheit', 'Temperature Celsius',
+                        'Direct Bilurubin'], output_csv='ssir.csv')
 ```
 
 #### Combine Diagnoses and SSIR Data
@@ -57,9 +58,18 @@ ss.combine_data(first_data='gottenDiagnoses.csv',
 import sickness_screening as ss
 
 ss.merge_and_get_data(merge_with='diagnoses_and_ssir.csv', 
-                                       blood_csv='path_to_blood.csv',
-                                       get_data_from='path_to_chartevents.csv',
-                                       output_csv='merged_data.csv')
+                      blood_csv='labevents.csv',
+                      get_data_from='chartevents.csv',
+                      output_csv='merged_data.csv',
+                      analyzes_names = {
+                        51222: "Hemoglobin",
+                        51279: "Red Blood Cell",
+                        51240: "Large Platelets",
+                        50861: "Alanine Aminotransferase (ALT)",
+                        50878: "Asparate Aminotransferase (AST)",
+                        225651: "Direct Bilirubin",
+                        50867: "Amylase",
+                        51301: "White Blood Cells"})
 ```
 
 #### Compress Data by patient
