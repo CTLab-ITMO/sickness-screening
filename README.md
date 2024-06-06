@@ -185,15 +185,15 @@ random_search = RandomizedSearchCV(
 
 ## Второй способ (трансформеры TabNet и DeepFM)
 ### Собираем датасет
-С помощью функции process_chartevents вы сможете собрать датасет из признаков. На вход данная функция принимает:
+С помощью функции process_features вы сможете собрать датасет из признаков. На вход данная функция принимает:
 * файл с признаками, по умолчанию 'chartevents.csv'
 * файл, в который будет записан итоговый датасет, по умолчанию 'df.csv'
-* список с названиями признаков, по умолчанию 225309: "ART BP Systolic", 220045: "HR", 220210: "RR", 223762: "Temperature C"
+* список с названиями признаков, по умолчанию ART BP Systolic, HR, RR, Temperature C
   
 ```python
 import sickness_screening as ss
 
-ss.process_chartevents(file_path = 'chartevents.csv', output_path = 'df.csv', item_ids = {
+ss.process_features(file_path = 'chartevents.csv', output_path = 'df.csv', item_ids = {
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
@@ -203,19 +203,19 @@ ss.process_chartevents(file_path = 'chartevents.csv', output_path = 'df.csv', it
 ```python
 import sickness_screening as ss
 
-ss.add_diagnosis_column(drgcodes_path = 'drgcodes.csv', merged_data_path = 'df.csv', output_path = 'df_with_target.csv')
+ss.add_diagnosis_column(drgcodes_path = 'drgcodes.csv', feature_path = 'df.csv', output_path = 'df.csv')
 ```
 где:
 * drgcodes_path - файл с диагнозами, по умолчанию 'drgcodes.csv'
-* merged_data_path - наш файл с признаками, по умолчанию 'df.csv'
-* output_path - файл, в который будет записан итоговый датасет, по умолчанию 'df_with_target.csv'
+* feature_path - наш файл с признаками, по умолчанию 'df.csv'
+* output_path - файл, в который будет записан итоговый датасет, по умолчанию 'df.csv'
 
 ### Избавляемся от пропусков
 
 ```python
 import sickness_screening as ss
 
-ss.impute_data(input_path = 'df_with_target.csv', output_path = 'df_with_target_imputed.csv', features = {
+ss.impute_data(input_path = 'df.csv', output_path = 'df.csv', features = {
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
@@ -228,14 +228,14 @@ ss.impute_data(input_path = 'df_with_target.csv', output_path = 'df_with_target_
 ```python
 import sickness_screening as ss
 
-ss.prepare_and_save_data(input_path = 'df_with_target_imputed.csv', test_size = 0.4, random_state = 42, features = {
+ss.prepare_and_save_data(input_path = 'df.csv', test_size = 0.4, random_state = 42, features = {
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
-                        223762: "Temperature C"}, target = 'diagnosis', resampled_output_path = 'train_data_MEWS.csv', test_output_path = 'test_data.csv')
+                        223762: "Temperature C"}, target = 'diagnosis', resampled_output_path = 'train_data.csv', test_output_path = 'test_data.csv')
 ```
-На вход данная функция также принимает входные и выходные файлы ('df_with_target_imputed.csv', 'train_data_MEWS.csv' и 'test_data.csv'), признаки и целевую переменную.
-Здесь мы используем синтетическое генерирование данных (SMOTE)
+На вход данная функция также принимает входные и выходные файлы ('df.csv', 'train_data.csv' и 'test_data.csv'), признаки и целевую переменную.
+Здесь мы используем синтетическое генерирование данных (SMOTE).
 
 Также дисбаланс классов в тестовых и валидационных данных вы можете убрать с помощью функции:
 ```python
@@ -245,7 +245,7 @@ resample_test_val_data(input_path = 'test_data.csv', test_size = 0.4, random_sta
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
-                        223762: "Temperature C"}, target = 'diagnosis', test_output_path = 'test_resampled_data.csv', val_output_path = 'val_resampled_data.csv')
+                        223762: "Temperature C"}, target = 'diagnosis', test_output_path = 'test_data.csv', val_output_path = 'val_data.csv')
 ```
 
 ### Обучение трансформера TabNet
@@ -259,7 +259,7 @@ Sparsemax генерирует разреженное распределение
 ```python
 import sickness_screening as ss
 
-ss.train_tabnet_model(train_path = 'train_data_MEWS.csv', val_path = 'val_resampled_data_MEWS.csv', feature_importances_path = 'fimp.txt', model_save_path = 'tabnet_model_test_1', optimizer_params = dict(lr=0.05), scheduler_params = {
+ss.train_tabnet_model(train_path = 'train_data.csv', val_path = 'val_data.csv', feature_importances_path = 'fimp.txt', model_save_path = 'tabnet_model_test', optimizer_params = dict(lr=0.05), scheduler_params = {
     "step_size": 10,
     "gamma": 0.9
 }, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax', pretraining_ratio=1.0, max_epochs=200, patience=50)
@@ -270,10 +270,11 @@ ss.train_tabnet_model(train_path = 'train_data_MEWS.csv', val_path = 'val_resamp
 ```python
 import sickness_screening as ss
 
-ss.evaluate_tabnet_model(model_path = 'tabnet_model_test_1.zip', test_data_path = 'test_resampled_data_MEWS.csv', metrics_output_path = 'metrics.txt')
+ss.evaluate_tabnet_model(model_path = 'tabnet_model_test.zip', test_data_path = 'test_data.csv', metrics_output_path = 'metrics.txt')
 ```
 
-### Теперь пройдемся по шагам
+### Раздеремся на примере по предсказанию сепсиса у людей с использованием табличных данных MIMIC (база данных интенсивной терапии)
+### Теперь пройдемся по шагам (можно посмотреть в )
 #### 1. Соберем датасет
 Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
@@ -281,26 +282,24 @@ ss.evaluate_tabnet_model(model_path = 'tabnet_model_test_1.zip', test_data_path 
 * Частота дыхания
 * Температура
 ```python
-  item_ids_set = set(item_ids)
+item_ids_set = set(map(str, item_ids.keys()))
 
-  with open(file_path) as f:
-      headers = f.readline().replace('\n', '').split(',')
-      i = 0
-      for line in tqdm(f):
-          values = line.replace('\n', '').split(',')
-          subject_id = values[0]
-          item_id = values[6]
-          valuenum = values[8]
-          if item_id in item_ids_set:
-              if subject_id not in result:
-                  result[subject_id] = {}
-              result[subject_id][item_id] = valuenum
-          i += 1
-  
-  table = pd.DataFrame.from_dict(result, orient='index')
-  table['subject_id'] = table.index
+with open(file_path) as f:
+    headers = f.readline().replace('\n', '').split(',')
+    i = 0
+    for line in tqdm(f):
+        values = line.replace('\n', '').split(',')
+        subject_id = values[0]
+        item_id = values[6]
+        valuenum = values[8]
+        if item_id in item_ids_set:
+            if subject_id not in result:
+                result[subject_id] = {}
+            result[subject_id][item_id] = valuenum
+        i += 1
 
-item_ids = [str(x) for x in [225309, 220045, 220210, 223762]]
+table = pd.DataFrame.from_dict(result, orient='index')
+table['subject_id'] = table.index
 ```
 
 #### Добавляем таргет
