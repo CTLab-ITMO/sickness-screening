@@ -219,9 +219,21 @@ ss.impute_data(input_path = 'df.csv', output_path = 'df.csv', features = {
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
-                        223762: "Temperature C"})
+                        223762: "Temperature C"}, imputation_method='nona')
 ```
 Эта функция поможет вам убрать пропуски в датасете с помощью библиотеки NoNa, которая других моделей машинного обучения. Данный алгоритм заполняет пропуски различными методами машинного обучения, по умолчанию мы используем StandardScaler, Ridge и RandomForestClassifier.
+
+
+Также в качестве imputation_method можно использовать:
+* SimpleImputer
+  - mean
+  - median
+  - most_frequent
+* KNNImputer
+  - knn
+* IterativeImputer
+  - iterative
+* dropna
 
 ### Борьба с дисбалансом классов
 
@@ -266,6 +278,14 @@ TabNet - это архитектура глубокого обучения на 
   
 Sparsemax - мягкий максимум, генерирует разреженное распределение, где большинство значений равны 0.
 
+```python
+import sickness_screening as ss
+
+ss.train_tabnet_model(train_path = 'train_data.csv', val_path = 'val_data.csv', feature_importances_path = 'fimp.txt', model_save_path = 'tabnet_model_test', optimizer_params = dict(lr=0.05), scheduler_params = {
+    "step_size": 10,
+    "gamma": 0.9
+}, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax', pretraining_ratio=1.0, max_epochs=200, patience=50)
+```
 
 Вы также можете использовать:
 * в качестве scheduler:
@@ -284,15 +304,6 @@ Sparsemax - мягкий максимум, генерирует разрежен
   - SGD
   - RMSprop
 
-```python
-import sickness_screening as ss
-
-ss.train_tabnet_model(train_path = 'train_data.csv', val_path = 'val_data.csv', feature_importances_path = 'fimp.txt', model_save_path = 'tabnet_model_test', optimizer_params = dict(lr=0.05), scheduler_params = {
-    "step_size": 10,
-    "gamma": 0.9
-}, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax', pretraining_ratio=1.0, max_epochs=200, patience=50)
-```
-
 ### Просмотр метрик
 После обучения модели вы можете посмотреть точность предсказаний с помощью функции evaluate_tabnet_model:
 ```python
@@ -303,7 +314,7 @@ ss.evaluate_tabnet_model(model_path = 'tabnet_model_test.zip', test_data_path = 
 
 ### Раздеремся на примере по предсказанию сепсиса у людей с использованием табличных данных MIMIC (база данных интенсивной терапии)
 ### Теперь пройдемся по шагам (можно посмотреть в [colab](sepsis-predictions/Transformers/TabNet.ipynb))
-#### 1. Соберем датасет
+#### 1.Собираем датасет
 Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
 * Частота сердцебиения
@@ -331,13 +342,13 @@ table = pd.DataFrame.from_dict(result, orient='index')
 table['subject_id'] = table.index
 ```
 
-#### Добавляем таргет
+#### 2.Добавляем таргет
 ```python
 target_subjects = drgcodes.loc[drgcodes['drg_code'].isin([870, 871, 872]), 'subject_id']
 merged_data.loc[merged_data['subject_id'].isin(target_subjects), 'diagnosis'] = 1
 ```
 
-#### Заполнение пробелов с помощью библиотеки NoNa
+#### 3.Заполняем пропуски с помощью библиотеки NoNa
 ```python
 nona(
     data=X,
@@ -346,13 +357,13 @@ nona(
 )
 ```
 
-#### Устранение дисбаланса классов с помощью SMOTE
+#### 4.Устраняем дисбаланс классов с помощью SMOTE
 ```python
 smote = SMOTE(random_state=random_state)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 ```
 
-#### Обучаем модель TabNet
+#### 5.Обучаем модель TabNet
 ```python
 unsupervised_model = TabNetPretrainer(
     optimizer_fn=torch.optim.Adam,
@@ -384,7 +395,7 @@ clf.fit(
 )
 
 ```
-#### Обучаем модель DeepFM
+#### 6.Обучаем модель DeepFM
 ```python
 deepfm = DeepFM("ranking", data_info, embed_size=16, n_epochs=2,
                 lr=1e-4, lr_decay=False, reg=None, batch_size=1,
@@ -396,7 +407,7 @@ deepfm.fit(train_data, verbose=2, shuffle=True, eval_data=eval_data,
                     "precision", "recall", "map", "ndcg"])
 ```
 
-#### Смотрим полученные метрики
+#### 7.Смотрим на полученные метрики
 ```python
 result = loaded_clf.predict(X_test.values)
 accuracy = (result == y_test.values).mean()
