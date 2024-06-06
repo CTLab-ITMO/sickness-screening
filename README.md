@@ -261,13 +261,13 @@ TabNet - это архитектура глубокого обучения на 
 
 
 Для scheduler также используем: оптимизатор Adam, step_size = 10, gamma = 0.9
-* маскировка sparsemax - мягкий максимум,
+* маскировка sparsemax,
 
   
-Sparsemax генерирует разреженное распределение, где большинство значений равны 0).
+Sparsemax - мягкий максимум, генерирует разреженное распределение, где большинство значений равны 0.
 
 
-Вы можете использовать:
+Вы также можете использовать:
 * в качестве scheduler:
   - MultiStepLR
   - ExponentialLR
@@ -309,6 +309,7 @@ ss.evaluate_tabnet_model(model_path = 'tabnet_model_test.zip', test_data_path = 
 * Частота сердцебиения
 * Частота дыхания
 * Температура
+  
 ```python
 item_ids_set = set(map(str, item_ids.keys()))
 
@@ -403,6 +404,9 @@ precision = precision_score(y_test.values, result)
 recall = recall_score(y_test.values, result)
 f1 = f1_score(y_test.values, result)
 ```
+#### Результаты
+Accuracy = 0.60
+Recall = 0.92
 
 #### Была произведена визуализация по 2 PCA компонентам
 ![Image alt](./Визуализация_2_PCA_компоненты.png)
