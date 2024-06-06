@@ -186,24 +186,96 @@ random_search = RandomizedSearchCV(
 ## Второй способ (трансформеры TabNet и DeepFM)
 ### Собираем датасет
 С помощью функции process_chartevents вы сможете собрать датасет из признаков. На вход данная функция принимает:
-* файл с признаками
-* файл, в который будет записан итоговый датасет
-* список с названиями признаков
+* файл с признаками, по умолчанию 'chartevents.csv'
+* файл, в который будет записан итоговый датасет, по умолчанию 'df.csv'
+* список с названиями признаков, по умолчанию 225309: "ART BP Systolic", 220045: "HR", 220210: "RR", 223762: "Temperature C"
   
 ```python
-process_chartevents(file_path, output_path, item_ids)
+import sickness_screening as ss
+
+ss.process_chartevents(file_path = 'chartevents.csv', output_path = 'df.csv', item_ids = {
+                        225309: "ART BP Systolic",
+                        220045: "HR",
+                        220210: "RR",
+                        223762: "Temperature C"})
 ```
 Добавляем таргет с помощью функции
 ```python
-add_diagnosis_column(drgcodes_path, merged_data_path, output_path)
+import sickness_screening as ss
+
+ss.add_diagnosis_column(drgcodes_path = 'drgcodes.csv', merged_data_path = 'df.csv', output_path = 'df_with_target.csv')
 ```
 где:
-* drgcodes_path - файл с диагнозами
-* merged_data_path - наш файл с признаками
-* output_path - файл, в который будет записан итоговый датасет
+* drgcodes_path - файл с диагнозами, по умолчанию 'drgcodes.csv'
+* merged_data_path - наш файл с признаками, по умолчанию 'df.csv'
+* output_path - файл, в который будет записан итоговый датасет, по умолчанию 'df_with_target.csv'
 
-### Собираем признаки в датасет 
-#### Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
+### Избавляемся от пропусков
+
+```python
+import sickness_screening as ss
+
+ss.impute_data(input_path = 'df_with_target.csv', output_path = 'df_with_target_imputed.csv', features = {
+                        225309: "ART BP Systolic",
+                        220045: "HR",
+                        220210: "RR",
+                        223762: "Temperature C"})
+```
+Эта функция поможет вам убрать пропуски в датасете с помощью библиотеки NoNa, которая других моделей машинного обучения. Данный алгоритм заполняет пропуски различными методами машинного обучения, по умолчанию мы используем StandardScaler, Ridge и RandomForestClassifier.
+
+### Борьба с дисбалансом классов
+
+```python
+import sickness_screening as ss
+
+ss.prepare_and_save_data(input_path = 'df_with_target_imputed.csv', test_size = 0.4, random_state = 42, features = {
+                        225309: "ART BP Systolic",
+                        220045: "HR",
+                        220210: "RR",
+                        223762: "Temperature C"}, target = 'diagnosis', resampled_output_path = 'train_data_MEWS.csv', test_output_path = 'test_data.csv')
+```
+На вход данная функция также принимает входные и выходные файлы ('df_with_target_imputed.csv', 'train_data_MEWS.csv' и 'test_data.csv'), признаки и целевую переменную.
+Здесь мы используем синтетическое генерирование данных (SMOTE)
+
+Также дисбаланс классов в тестовых и валидационных данных вы можете убрать с помощью функции:
+```python
+import sickness_screening as ss
+
+resample_test_val_data(input_path = 'test_data.csv', test_size = 0.4, random_state = 42, features = {
+                        225309: "ART BP Systolic",
+                        220045: "HR",
+                        220210: "RR",
+                        223762: "Temperature C"}, target = 'diagnosis', test_output_path = 'test_resampled_data.csv', val_output_path = 'val_resampled_data.csv')
+```
+
+### Обучение трансформера TabNet
+TabNet - это архитектура глубокого обучения на основе табличных данных. TabNet применяет последовательные оценки для выбора признаков, которые следует использовать на каждом этапе принятия решения. 
+Сначала используем полуконтролируемое предварительное обучение с помощью TabNetPretrainer, а далее создаём и обучаем модель классификации с использованием TabNetClassifier. По умолчанию: 
+* learning rate = 0.05,
+* планировщик изменения скорости обучения (learning rate scheduler) - StepLR,
+Для scheduler также используем: оптимизатор Adam, step_size = 10, gamma = 0.9,
+* маскировка sparsemax - мягкий максимум,
+Sparsemax генерирует разреженное распределение, где большинство значений равны 0).
+```python
+import sickness_screening as ss
+
+ss.train_tabnet_model(train_path = 'train_data_MEWS.csv', val_path = 'val_resampled_data_MEWS.csv', feature_importances_path = 'fimp.txt', model_save_path = 'tabnet_model_test_1', optimizer_params = dict(lr=0.05), scheduler_params = {
+    "step_size": 10,
+    "gamma": 0.9
+}, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax', pretraining_ratio=1.0, max_epochs=200, patience=50)
+```
+
+### Просмотр метрик
+После обучения модели вы можете посмотреть точность предсказаний с помощью функции evaluate_tabnet_model:
+```python
+import sickness_screening as ss
+
+ss.evaluate_tabnet_model(model_path = 'tabnet_model_test_1.zip', test_data_path = 'test_resampled_data_MEWS.csv', metrics_output_path = 'metrics.txt')
+```
+
+### Теперь пройдемся по шагам
+#### 1. Соберем датасет
+Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
 * Частота сердцебиения
 * Частота дыхания
@@ -237,7 +309,7 @@ target_subjects = drgcodes.loc[drgcodes['drg_code'].isin([870, 871, 872]), 'subj
 merged_data.loc[merged_data['subject_id'].isin(target_subjects), 'diagnosis'] = 1
 ```
 
-#### Заполнение пробелов с помощью библиотеки NoNa. Данный алгоритм заполняет пропуски различными методами машинного обучения, мы используем StandardScaler, Ridge и RandomForestClassifier
+#### Заполнение пробелов с помощью библиотеки NoNa
 ```python
 nona(
     data=X,
@@ -252,7 +324,7 @@ smote = SMOTE(random_state=random_state)
 X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
 ```
 
-#### Обучаем модель TabNet. TabNet - это расширение pyTorch. Сначала импользуем полуконтролируемое предварительное обучение с помощью TabNetPretrainer, а далее создаём и обучаем модель классификации с использованием TabNetClassifier
+#### Обучаем модель TabNet
 ```python
 unsupervised_model = TabNetPretrainer(
     optimizer_fn=torch.optim.Adam,
