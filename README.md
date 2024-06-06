@@ -183,9 +183,9 @@ random_search = RandomizedSearchCV(
 )
 ```
 
-## Второй способ (трансформеры TabNet и DeepFM)
-### Собираем датасет
-С помощью функции process_features вы сможете собрать датасет из признаков. На вход данная функция принимает:
+### Второй способ (трансформеры TabNet и DeepFM)
+#### Сборка датасета
+С помощью функции process_features можно собрать датасет из признаков. На вход данная функция принимает:
 * файл с признаками, по умолчанию 'chartevents.csv'
 * файл, в который будет записан итоговый датасет, по умолчанию 'df.csv'
 * список с названиями признаков, по умолчанию ART BP Systolic, HR, RR, Temperature C
@@ -210,7 +210,7 @@ ss.add_diagnosis_column(drgcodes_path = 'drgcodes.csv', feature_path = 'df.csv',
 * feature_path - наш файл с признаками, по умолчанию 'df.csv'
 * output_path - файл, в который будет записан итоговый датасет, по умолчанию 'df.csv'
 
-### Избавляемся от пропусков
+#### Заполнение пропусков
 
 ```python
 import sickness_screening as ss
@@ -221,10 +221,10 @@ ss.impute_data(input_path = 'df.csv', output_path = 'df.csv', features = {
                         220210: "RR",
                         223762: "Temperature C"}, imputation_method='nona')
 ```
-Эта функция поможет вам убрать пропуски в датасете с помощью библиотеки NoNa, которая других моделей машинного обучения. Данный алгоритм заполняет пропуски различными методами машинного обучения, по умолчанию мы используем StandardScaler, Ridge и RandomForestClassifier.
+Эта функция поможет убрать пропуски в датасете с помощью библиотеки NoNa. Данный алгоритм заполняет пропуски различными методами машинного обучения, по умолчанию используется StandardScaler, Ridge и RandomForestClassifier.
 
 
-Также в качестве imputation_method можно использовать:
+В качестве imputation_method можно использовать:
 * SimpleImputer
   - mean
   - median
@@ -246,15 +246,15 @@ ss.resample_data(input_path = 'df.csv', test_size = 0.4, random_state = 42, feat
                         220210: "RR",
                         223762: "Temperature C"}, target = 'diagnosis', resampled_output_path = 'train_data.csv', test_output_path = 'test_data.csv', resampling_method='SMOTE')
 ```
-На вход данная функция также принимает входные и выходные файлы ('df.csv', 'train_data.csv' и 'test_data.csv'), признаки и целевую переменную.
-По умолчанию мы используем синтетическое генерирование данных (SMOTE), но вы можете выбрать:
+На вход данная функция принимает входные и выходные файлы ('df.csv', 'train_data.csv' и 'test_data.csv'), признаки и целевую переменную.
+По умолчанию используется синтетическое генерирование данных (SMOTE), но можно выбрать:
 * RandomOverSampler,
 * RandomUnderSampler,
 * ADASYN,
 * SMOTEENN,
 * SMOTETomek.
 
-Также дисбаланс классов в тестовых и валидационных данных вы можете убрать с помощью функции:
+Дисбаланс классов в тестовых и валидационных данных можно убрать с помощью функции:
 ```python
 import sickness_screening as ss
 
@@ -287,7 +287,7 @@ ss.train_model(model_type = 'TabNet', train_path = 'train_data.csv', val_path = 
 }, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax', pretraining_ratio=1.0, max_epochs=200, patience=50, deepfm_params=None)
 ```
 
-Вы также можете использовать:
+Можно использовать:
 * в качестве scheduler:
   - MultiStepLR
   - ExponentialLR
@@ -305,7 +305,7 @@ ss.train_model(model_type = 'TabNet', train_path = 'train_data.csv', val_path = 
   - RMSprop
 
 ### Просмотр метрик
-После обучения модели вы можете посмотреть точность предсказаний с помощью функции evaluate_tabnet_model:
+После обучения модели можно посмотреть точность предсказаний с помощью функции evaluate_tabnet_model:
 
 ```python
 import sickness_screening as ss
