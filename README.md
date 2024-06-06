@@ -235,7 +235,7 @@ ss.impute_data(input_path = 'df.csv', output_path = 'df.csv', features = {
   - iterative
 * dropna
 
-### Борьба с дисбалансом классов
+#### Борьба с дисбалансом классов
 
 ```python
 import sickness_screening as ss
@@ -265,7 +265,7 @@ ss.resample_test_val_data(input_path = 'test_data.csv', test_size = 0.4, random_
                         223762: "Temperature C"}, target = 'diagnosis', test_output_path = 'test_data.csv', val_output_path = 'val_data.csv')
 ```
 
-### Обучение трансформера: TabNet или DeepFM (по умолчанию TabNet)
+#### Обучение трансформера: TabNet или DeepFM (по умолчанию TabNet)
 TabNet - это архитектура глубокого обучения на основе табличных данных. TabNet применяет последовательные оценки для выбора признаков, которые следует использовать на каждом этапе принятия решения. 
 Сначала используем полуконтролируемое предварительное обучение с помощью TabNetPretrainer, а далее создаём и обучаем модель классификации с использованием TabNetClassifier. По умолчанию: 
 * learning rate = 0.05,
@@ -304,7 +304,7 @@ ss.train_model(model_type = 'TabNet', train_path = 'train_data.csv', val_path = 
   - SGD
   - RMSprop
 
-### Просмотр метрик
+#### Просмотр метрик
 После обучения модели можно посмотреть точность предсказаний с помощью функции evaluate_tabnet_model:
 
 ```python
@@ -313,8 +313,8 @@ import sickness_screening as ss
 ss.evaluate_tabnet_model(model_path = 'tabnet_model_test.zip', test_data_path = 'test_data.csv', metrics_output_path = 'metrics.txt')
 ```
 
-### Раздеремся на примере по предсказанию сепсиса у людей с использованием табличных данных MIMIC (база данных интенсивной терапии)
-### Теперь пройдемся по шагам (можно посмотреть в [colab](sepsis-predictions/Transformers/TabNet.ipynb))
+### Разберем на примере по предсказанию сепсиса у людей с использованием табличных данных MIMIC (база данных интенсивной терапии)
+### Пройдемся по шагам (можно посмотреть в [colab](sepsis-predictions/Transformers/TabNet.ipynb))
 #### 1. Собираем датасет
 Можно выбрать абсолютно любые признаки, но мы возьмем 4 как в MEWS (Модифицированная оценка раннего предупреждения), чтобы предсказывать сепсис в первые часы пребывания человека в больнице:
 * Систолическое артериальное давление
