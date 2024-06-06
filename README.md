@@ -228,20 +228,25 @@ ss.impute_data(input_path = 'df.csv', output_path = 'df.csv', features = {
 ```python
 import sickness_screening as ss
 
-ss.prepare_and_save_data(input_path = 'df.csv', test_size = 0.4, random_state = 42, features = {
+ss.resample_data(input_path = 'df.csv', test_size = 0.4, random_state = 42, features = {
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
-                        223762: "Temperature C"}, target = 'diagnosis', resampled_output_path = 'train_data.csv', test_output_path = 'test_data.csv')
+                        223762: "Temperature C"}, target = 'diagnosis', resampled_output_path = 'train_data.csv', test_output_path = 'test_data.csv', resampling_method='SMOTE')
 ```
 На вход данная функция также принимает входные и выходные файлы ('df.csv', 'train_data.csv' и 'test_data.csv'), признаки и целевую переменную.
-Здесь мы используем синтетическое генерирование данных (SMOTE).
+По умолчанию мы используем синтетическое генерирование данных (SMOTE), но вы можете выбрать:
+* RandomOverSampler,
+* RandomUnderSampler,
+* ADASYN,
+* SMOTEENN,
+* SMOTETomek.
 
 Также дисбаланс классов в тестовых и валидационных данных вы можете убрать с помощью функции:
 ```python
 import sickness_screening as ss
 
-resample_test_val_data(input_path = 'test_data.csv', test_size = 0.4, random_state = 42, features = {
+ss.resample_test_val_data(input_path = 'test_data.csv', test_size = 0.4, random_state = 42, features = {
                         225309: "ART BP Systolic",
                         220045: "HR",
                         220210: "RR",
@@ -256,6 +261,23 @@ TabNet - это архитектура глубокого обучения на 
 Для scheduler также используем: оптимизатор Adam, step_size = 10, gamma = 0.9,
 * маскировка sparsemax - мягкий максимум,
 Sparsemax генерирует разреженное распределение, где большинство значений равны 0).
+Вы можете использовать:
+* в качестве scheduler:
+  - MultiStepLR
+  - ExponentialLR
+  - CosineAnnealingLR
+  - ReduceLROnPlateau
+  - CyclicLR
+  - OneCycleLR
+* в качестве sparsemax:
+  - entmax
+  - softmax
+* в качестве оптимизатора:
+  - Adamax
+  - AdamW
+  - SGD
+  - RMSprop
+
 ```python
 import sickness_screening as ss
 
