@@ -23,18 +23,23 @@ from imblearn.over_sampling import SMOTE
 import torch
 from sklearn.metrics import precision_score, recall_score, f1_score
 
-
-def process_chartevents(file_path, output_path, item_ids):
-    """Collecting features of the dataset.
+def process_features(file_path = './MIMIC/icu/chartevents.csv', output_path = 'df_31.csv', item_ids = {
+                        225309: "ART BP Systolic",
+                        220045: "HR",
+                        220210: "RR",
+                        223762: "Temperature C"}):
+    """ Collecting features of the dataset
 
     Keyword arguments:
     file_path -- path to the file
     output_path -- path to the output file
     item_ids -- list of item ids
-
+    
     """
-    item_ids_set = set(item_ids)
+    item_ids_set = set(map(str, item_ids.keys()))
+
     result = {}
+
     with open(file_path) as f:
         headers = f.readline().replace('\n', '').split(',')
         i = 0
@@ -48,8 +53,10 @@ def process_chartevents(file_path, output_path, item_ids):
                     result[subject_id] = {}
                 result[subject_id][item_id] = valuenum
             i += 1
+    
     table = pd.DataFrame.from_dict(result, orient='index')
     table['subject_id'] = table.index
+
     table.to_csv(output_path, index=False)
 
 def add_diagnosis_column(drgcodes_path, merged_data_path, output_path):
