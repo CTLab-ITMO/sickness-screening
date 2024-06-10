@@ -1,26 +1,27 @@
 import pandas as pd
 
-
 def fahrenheit_to_celsius(f):
     return (f - 32) * 5.0 / 9.0
 
-
-def combine_data(first_data='gottenDiagnoses.csv', has_disease_column='has_sepsis',
-                 second_data='ssir.csv', title_column='long_title', subject_id_column='subject_id',
+def combine_data(first_data=None, second_data=None, first_data_csv='gottenDiagnoses.csv', has_disease_column='has_sepsis',
+                 second_data_csv='ssir.csv', title_column='long_title', subject_id_column='subject_id',
                  output_information_df='sepsis_info_df.csv', disease_str='sepsis', has_temp=True,
                  translate_data_from_col='Temperature Fahrenheit', translate_data_to_col='Temperature Celsius',
                  translate_function=fahrenheit_to_celsius, value_column='valueuom', log_stats=True,
-                 output_file='diagnoses_and_ssir.csv'):
+                 output_file=None):
     """
-    Combines diagnoses and SSIR data, translate temperature from Fahrenheit to Celsius (or any other value if needed),
-    and log statistics about sepsis patients.
-    Also, it could be possible to combine any other csv data frames as long as both of them have specified columns.
-    First should have title_column and subject_id, second data_frame should have at least subject_id column.
-    Output file will have boolean value about long_title containing disease_str value.
+    Combines diagnoses and SSIR data, translates temperature from Fahrenheit to Celsius (or any other value if needed),
+    and logs statistics about sepsis patients.
+    Also, it can combine any other CSV data frames as long as both of them have specified columns.
+    The first should have title_column and subject_id, the second data_frame should have at least the subject_id column.
+    The output file will have a boolean value about long_title containing disease_str value.
+
     Args:
-        first_data (str): Path to the CSV file containing diagnoses data. Default is 'gottenDiagnoses.csv'.
+        first_data (pd.DataFrame, optional): DataFrame containing diagnoses data. Default is None.
+        first_data_csv (str, optional): Path to the CSV file containing diagnoses data. Default is 'gottenDiagnoses.csv'.
         has_disease_column (str): Column name to indicate sepsis presence. Default is 'has_sepsis'.
-        second_data (str): Path to the CSV file containing SSIR data. Default is 'ssir.csv'.
+        second_data (pd.DataFrame, optional): DataFrame containing SSIR data. Default is None.
+        second_data_csv (str, optional): Path to the CSV file containing SSIR data. Default is 'ssir.csv'.
         title_column (str): Column name for diagnosis titles. Default is 'long_title'.
         subject_id_column (str): Column name for subject IDs. Default is 'subject_id'.
         output_information_df (str): Path to the output CSV file for sepsis information. Default is 'sepsis_info_df.csv'.
@@ -29,29 +30,43 @@ def combine_data(first_data='gottenDiagnoses.csv', has_disease_column='has_sepsi
         translate_data_from_col (str): Column name for temperature in Fahrenheit. Default is 'Temperature Fahrenheit'.
         translate_data_to_col (str): Column name for temperature in Celsius. Default is 'Temperature Celsius'.
         translate_function (function): Function to convert Fahrenheit to Celsius. Default is fahrenheit_to_celsius.
-        value_column (str): Column name to be excluded from the merged data. Default is 'valueom'.
+        value_column (str): Column name to be excluded from the merged data. Default is 'valueuom'.
         log_stats (bool): Whether to log statistics about sepsis patients. Default is True.
-        output_file (str): Path to the output CSV file for combined data. Default is 'diagnoses_and_ssir.csv'.
+        output_file (str, optional): Path to the output CSV file for combined data. Default is None.
 
     Returns:
-        None: Writes the combined and processed data to the specified output file.
+        pd.DataFrame: The combined and processed data.
     """
-    diagnoses = pd.read_csv(first_data)
-    ssir = pd.read_csv(second_data)
+    if first_data is None and first_data_csv is not None:
+        diagnoses = pd.read_csv(first_data_csv)
+    elif first_data is not None:
+        diagnoses = first_data
+    else:
+        raise ValueError("Either first_data or first_data_csv must be provided.")
+
+    if second_data is None and second_data_csv is not None:
+        ssir = pd.read_csv(second_data_csv)
+    elif second_data is not None:
+        ssir = second_data
+    else:
+        raise ValueError("Either second_data or second_data_csv must be provided.")
+
     diagnoses[has_disease_column] = diagnoses[title_column].str.contains(disease_str, case=False, na=False)
     sepsis_info_df = diagnoses.groupby(subject_id_column)[has_disease_column].any().reset_index()
-    sepsis_info_df.to_csv(output_information_df)
+    sepsis_info_df.to_csv(output_information_df, index=False)
     merged_df = pd.merge(ssir, sepsis_info_df, on=subject_id_column, how='left')
     merged_df.drop(columns=[col for col in merged_df.columns if value_column in col], inplace=True)
+
     if has_temp:
         merged_df[translate_data_to_col] = merged_df.apply(
-            lambda row: translate_function(row[translate_data_from_col]) if pd.notnull(
-                row[translate_data_from_col]) else
-            row[translate_data_to_col],
+            lambda row: translate_function(row[translate_data_from_col]) if pd.notnull(row[translate_data_from_col]) else row[translate_data_to_col],
             axis=1
         )
         merged_df.drop(columns=[translate_data_from_col], inplace=True)
-    merged_df.to_csv(output_file, index=False)
+
+    if output_file is not None:
+        merged_df.to_csv(output_file, index=False)
+
     if log_stats:
         ans = sepsis_info_df[has_disease_column].sum()
         unique_patients = merged_df[[subject_id_column, has_disease_column]].drop_duplicates()
@@ -62,7 +77,14 @@ def combine_data(first_data='gottenDiagnoses.csv', has_disease_column='has_sepsi
         ambiguous_sepsis_patients = grouped_sepsis[grouped_sepsis['min'] != grouped_sepsis['max']]
         count_ambiguous_sepsis = len(ambiguous_sepsis_patients)
         print(f'Correct number of patients with sepsis: {ans}')
-        print(f'Unique patients with predictions_sepsis: {count_with_sepsis}')
-        print(f'Unique patients without predictions_sepsis: {count_without_sepsis}')
-        print(f'Patients with both predictions_sepsis and no predictions_sepsis records: {count_ambiguous_sepsis}')
-        print(f'All unique patients: {len(grouped_sepsis)}')
+        print(f'Unique patients with sepsis predictions: {count_with_sepsis}')
+        print(f'Unique patients without sepsis predictions: {count_without_sepsis}')
+        print(f'Patients with both sepsis and no sepsis records: {count_ambiguous_sepsis}')
+        print(f'Total unique patients: {len(grouped_sepsis)}')
+
+    return merged_df
+
+# df1 = pd.read_csv('gottenDiagnoses.csv')
+# df2 = pd.read_csv('ssir.csv')
+# combined_df = combine_data(first_data=df1, second_data=df2, has_disease_column='has_sepsis', subject_id_column='subject_id')
+# combined_df.to_csv('combined_data.csv', index=False)
