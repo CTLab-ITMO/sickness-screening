@@ -17,4 +17,4 @@ from .transformers import prepare_and_save_data
 from .transformers import resample_test_val_data
 from .transformers import train_tabnet_model
 from .transformers import evaluate_tabnet_model
-warnings.filterwarnings('ignore', category=FutureWarning)
+from scipy.sparse import spmatrix
