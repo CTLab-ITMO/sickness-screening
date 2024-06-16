@@ -1,4 +1,5 @@
 import pandas as pd
+import warnings
 from .get_diagnoses_data import get_diagnoses_data
 from .get_analyzes_data import get_analyzes_data
 from .get_disease_info import get_diseas_info
@@ -16,7 +17,4 @@ from .transformers import prepare_and_save_data
 from .transformers import resample_test_val_data
 from .transformers import train_tabnet_model
 from .transformers import evaluate_tabnet_model
-def hello_world():
-    print("Hello, world! Version 2")
-
-print("")
+warnings.filterwarnings('ignore', category=FutureWarning)
