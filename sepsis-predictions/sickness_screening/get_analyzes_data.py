@@ -44,7 +44,8 @@ def get_analyzes_data(analyzes_df=None, analyzes_csv='chartevents.csv', subject_
     filtered_df = chartevents_df[chartevents_df[itemid_col].isin(itemids)]
     pivot_df = filtered_df.pivot_table(index=[subject_id_col, charttime_col], columns=itemid_col,
                                        values=[value_col, valueuom_col], aggfunc='first').reset_index()
-    pivot_df.columns = [subject_id_col, charttime_col] + rest_columns
+    pivot_df.columns = [' '.join(map(str, col)).strip() for col in pivot_df.columns.values]
+    pivot_df = pivot_df[rest_columns]
     if output_csv is not None:
         pivot_df.to_csv(output_csv, index=False)
 
