@@ -5,12 +5,10 @@ def fahrenheit_to_celsius(f):
 
 def combine_data(first_data=None, second_data=None, first_data_csv='gottenDiagnoses.csv', has_disease_column='has_sepsis',
                  second_data_csv='ssir.csv', title_column='long_title', subject_id_column='subject_id',
-                 output_information_df='sepsis_info_df.csv', disease_str='sepsis', has_temp=True,
-                 translate_data_from_col='Temperature Fahrenheit', translate_data_to_col='Temperature Celsius',
-                 translate_function=fahrenheit_to_celsius, value_column='valueuom', log_stats=True,
-                 output_file=None):
+                 output_information_df='sepsis_info_df.csv', disease_str='sepsis', translate_columns=None,
+                 translate_functions=None, value_column='valueuom', log_stats=True, output_file=None):
     """
-    Combines diagnoses and SSIR data, translates temperature from Fahrenheit to Celsius (or any other value if needed),
+    Combines diagnoses and SSIR data, translates specified columns using given functions,
     and logs statistics about sepsis patients.
     Also, it can combine any other CSV data frames as long as both of them have specified columns.
     The first should have title_column and subject_id, the second data_frame should have at least the subject_id column.
@@ -26,10 +24,8 @@ def combine_data(first_data=None, second_data=None, first_data_csv='gottenDiagno
         subject_id_column (str): Column name for subject IDs. Default is 'subject_id'.
         output_information_df (str): Path to the output CSV file for sepsis information. Default is 'sepsis_info_df.csv'.
         disease_str (str): String to identify sepsis-related diagnoses. Default is 'sepsis'.
-        has_temp (bool): Whether to process temperature data. Default is True.
-        translate_data_from_col (str): Column name for temperature in Fahrenheit. Default is 'Temperature Fahrenheit'.
-        translate_data_to_col (str): Column name for temperature in Celsius. Default is 'Temperature Celsius'.
-        translate_function (function): Function to convert Fahrenheit to Celsius. Default is fahrenheit_to_celsius.
+        translate_columns (dict, optional): Dictionary where keys are columns to translate from and values are columns to translate to. Default is None.
+        translate_functions (dict, optional): Dictionary where keys are columns to translate from and values are functions to use for translation. Default is None.
         value_column (str): Column name to be excluded from the merged data. Default is 'valueuom'.
         log_stats (bool): Whether to log statistics about sepsis patients. Default is True.
         output_file (str, optional): Path to the output CSV file for combined data. Default is None.
@@ -57,12 +53,15 @@ def combine_data(first_data=None, second_data=None, first_data_csv='gottenDiagno
     merged_df = pd.merge(ssir, sepsis_info_df, on=subject_id_column, how='left')
     merged_df.drop(columns=[col for col in merged_df.columns if value_column in col], inplace=True)
 
-    if has_temp:
-        merged_df[translate_data_to_col] = merged_df.apply(
-            lambda row: translate_function(row[translate_data_from_col]) if pd.notnull(row[translate_data_from_col]) else row[translate_data_to_col],
-            axis=1
-        )
-        merged_df.drop(columns=[translate_data_from_col], inplace=True)
+    if translate_columns and translate_functions:
+        for from_col, to_col in translate_columns.items():
+            if from_col in translate_functions:
+                translate_function = translate_functions[from_col]
+                merged_df[to_col] = merged_df.apply(
+                    lambda row: translate_function(row[from_col]) if pd.notnull(row[from_col]) else row[to_col],
+                    axis=1
+                )
+                merged_df.drop(columns=[from_col], inplace=True)
 
     if output_file is not None:
         merged_df.to_csv(output_file, index=False)
@@ -86,5 +85,5 @@ def combine_data(first_data=None, second_data=None, first_data_csv='gottenDiagno
 
 # df1 = pd.read_csv('gottenDiagnoses.csv')
 # df2 = pd.read_csv('ssir.csv')
-# combined_df = combine_data(first_data=df1, second_data=df2, has_disease_column='has_sepsis', subject_id_column='subject_id')
+# combined_df = combine_data(first_data=df1, second_data=df2, translate_columns=translate_columns, translate_functions=translate_functions)
 # combined_df.to_csv('combined_data.csv', index=False)

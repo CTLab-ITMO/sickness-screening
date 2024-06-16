@@ -77,12 +77,12 @@ def test_get_analyzes_data(mock_data):
     assert not result.empty
     assert 'subject_id' in result.columns
 
-# def test_combine_data(mock_data):
-#     result = combine_data(first_data=mock_data['mock_diagnoses'],
-#                           second_data=mock_data['mock_chartevents'])
-#     assert not result.empty
-#     assert 'subject_id' in result.columns
-#
+def test_combine_data(mock_data):
+    result = combine_data(first_data=mock_data['mock_diagnoses_result'],
+                          second_data=mock_data['mock_chartevents'])
+    assert not result.empty
+    assert 'subject_id' in result.columns
+
 # def test_merge_and_get_data(mock_data):
 #     result = merge_and_get_data(merge_with_df=mock_data['mock_diagnoses'],
 #                                 blood_df=mock_data['mock_blood'],
