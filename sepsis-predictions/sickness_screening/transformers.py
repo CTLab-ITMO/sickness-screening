@@ -23,18 +23,19 @@ from imblearn.over_sampling import SMOTE
 import torch
 from sklearn.metrics import precision_score, recall_score, f1_score
 
-def process_features(file_path = './MIMIC/icu/chartevents.csv', output_path = 'df_31.csv', item_ids = {
-                        225309: "ART BP Systolic",
-                        220045: "HR",
-                        220210: "RR",
-                        223762: "Temperature C"}):
+
+def process_features(file_path='./MIMIC/icu/chartevents.csv', output_path='df_31.csv', item_ids={
+    225309: "ART BP Systolic",
+    220045: "HR",
+    220210: "RR",
+    223762: "Temperature C"}):
     """ Collecting features of the dataset
 
     Keyword arguments:
     file_path -- path to the file
     output_path -- path to the output file
     item_ids -- list of item ids
-    
+
     """
     item_ids_set = set(map(str, item_ids.keys()))
 
@@ -53,11 +54,13 @@ def process_features(file_path = './MIMIC/icu/chartevents.csv', output_path = 'd
                     result[subject_id] = {}
                 result[subject_id][item_id] = valuenum
             i += 1
-    
+
     table = pd.DataFrame.from_dict(result, orient='index')
     table['subject_id'] = table.index
 
     table.to_csv(output_path, index=False)
+    return table
+
 
 def add_diagnosis_column(drgcodes_path, merged_data_path, output_path):
     """Add diagnosis column to dataset.
@@ -76,6 +79,7 @@ def add_diagnosis_column(drgcodes_path, merged_data_path, output_path):
     merged_data.loc[merged_data['subject_id'].isin(target_subjects), 'diagnosis'] = 1
     merged_data.to_csv(output_path, index=False)
 
+
 def impute_data(input_path, output_path, features):
     """Fill in the blanks.
 
@@ -86,16 +90,19 @@ def impute_data(input_path, output_path, features):
 
     """
     df = pd.read_csv(input_path)
-    X = df[features]
+    X = df[features].copy()
     nona(
         data=X,
         algreg=make_pipeline(StandardScaler(with_mean=False), Ridge(alpha=0.1)),
         algclass=RandomForestClassifier(max_depth=2, random_state=0)
     )
-    df[features] = X
+    # df[features] = X
+    df.loc[:, features] = X.values
     df.to_csv(output_path, index=False)
 
-def prepare_and_save_data(input_path, test_size, random_state, features, target, resampled_output_path, test_output_path):
+
+def prepare_and_save_data(input_path, test_size, random_state, features, target, resampled_output_path,
+                          test_output_path):
     """We divide the data into train and test. Getting rid of class imbalance in train.
 
     Keyword arguments:
@@ -112,10 +119,12 @@ def prepare_and_save_data(input_path, test_size, random_state, features, target,
     y_train = train_data[target]
     smote = SMOTE(random_state=random_state)
     X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
-    df_resampled = pd.concat([pd.DataFrame(X_resampled, columns=X_train.columns), pd.DataFrame(y_resampled, columns=[target])], axis=1)
+    df_resampled = pd.concat(
+        [pd.DataFrame(X_resampled, columns=X_train.columns), pd.DataFrame(y_resampled, columns=[target])], axis=1)
     df_resampled.to_csv(resampled_output_path, index=False)
     test_data.to_csv(test_output_path, index=False)
     return df_resampled, test_data
+
 
 def resample_test_val_data(input_path, test_size, random_state, features, target, test_output_path, val_output_path):
     """We divide the data into test and validation. Getting rid of class imbalance in test and in validation.
@@ -135,16 +144,21 @@ def resample_test_val_data(input_path, test_size, random_state, features, target
     X1 = test_data[features]
     y1 = test_data[target]
     X_resampled1, y_resampled1 = smote1.fit_resample(X1, y1)
-    df_resampled1 = pd.concat([pd.DataFrame(X_resampled1, columns=features), pd.DataFrame(y_resampled1, columns=[target])], axis=1)
+    df_resampled1 = pd.concat(
+        [pd.DataFrame(X_resampled1, columns=features), pd.DataFrame(y_resampled1, columns=[target])], axis=1)
     df_resampled1.to_csv(test_output_path, index=False)
     smote2 = SMOTE(random_state=42)
     X2 = val_data[features]
     y2 = val_data[target]
     X_resampled2, y_resampled2 = smote2.fit_resample(X2, y2)
-    df_resampled2 = pd.concat([pd.DataFrame(X_resampled2, columns=features), pd.DataFrame(y_resampled2, columns=[target])], axis=1)
+    df_resampled2 = pd.concat(
+        [pd.DataFrame(X_resampled2, columns=features), pd.DataFrame(y_resampled2, columns=[target])], axis=1)
     df_resampled2.to_csv(val_output_path, index=False)
 
-def train_tabnet_model(train_path, val_path, feature_importances_path, model_save_path, optimizer_params, scheduler_params, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax', pretraining_ratio=1.0, max_epochs=200, patience=50):
+
+def train_tabnet_model(train_path, val_path, feature_importances_path, model_save_path, optimizer_params,
+                       scheduler_params, pretraining_lr=0.05, training_lr=0.05, mask_type='sparsemax',
+                       pretraining_ratio=1.0, max_epochs=200, patience=50):
     """Model training, preserving the importance of features and saving the model.
 
     Keyword arguments:
@@ -168,16 +182,16 @@ def train_tabnet_model(train_path, val_path, feature_importances_path, model_sav
     y_train = train_data['diagnosis']
     X_val = val_data.drop(['diagnosis'], axis=1)
     y_val = val_data['diagnosis']
-    unsupervised_model = TabNetPretrainer(
-        optimizer_fn=torch.optim.Adam,
-        optimizer_params=dict(lr=pretraining_lr),
-        mask_type=mask_type
-    )
-    unsupervised_model.fit(
-        X_train=X_train.values,
-        eval_set=[X_val.values],
-        pretraining_ratio=pretraining_ratio,
-    )
+    # unsupervised_model = TabNetPretrainer(
+    #     optimizer_fn=torch.optim.Adam,
+    #     optimizer_params=dict(lr=pretraining_lr),
+    #     mask_type=mask_type
+    # )
+    # unsupervised_model.fit(
+    #     X_train=X_train.values,
+    #     eval_set=[X_val.values],
+    #     pretraining_ratio=pretraining_ratio,
+    # )
     clf = TabNetClassifier(
         optimizer_fn=torch.optim.AdamW,
         optimizer_params=dict(lr=training_lr),
@@ -190,12 +204,13 @@ def train_tabnet_model(train_path, val_path, feature_importances_path, model_sav
         eval_set=[(X_val.values, y_val.values)],
         eval_metric=['auc'],
         max_epochs=max_epochs,
-        patience=patience,
-        from_unsupervised=unsupervised_model
+        patience=patience
+        # from_unsupervised=unsupervised_model
     )
     with open(feature_importances_path, 'w') as f:
         f.write(f'{clf.feature_importances_}')
     clf.save_model(model_save_path)
+
 
 def evaluate_tabnet_model(model_path, test_data_path, metrics_output_path):
     """Evaluate the model.
