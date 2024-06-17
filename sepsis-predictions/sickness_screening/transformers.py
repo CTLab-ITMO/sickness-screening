@@ -58,6 +58,7 @@ def process_features(file_path = './MIMIC/icu/chartevents.csv', output_path = 'd
     table['subject_id'] = table.index
 
     table.to_csv(output_path, index=False)
+    return table
 
 def add_diagnosis_column(drgcodes_path, merged_data_path, output_path):
     """Add diagnosis column to dataset.
@@ -86,13 +87,14 @@ def impute_data(input_path, output_path, features):
 
     """
     df = pd.read_csv(input_path)
-    X = df[features]
+    X = df[features].copy()
     nona(
         data=X,
         algreg=make_pipeline(StandardScaler(with_mean=False), Ridge(alpha=0.1)),
         algclass=RandomForestClassifier(max_depth=2, random_state=0)
     )
-    df[features] = X
+    # df[features] = X
+    df.loc[:, features] = X.values
     df.to_csv(output_path, index=False)
 
 def prepare_and_save_data(input_path, test_size, random_state, features, target, resampled_output_path, test_output_path):
@@ -168,16 +170,16 @@ def train_tabnet_model(train_path, val_path, feature_importances_path, model_sav
     y_train = train_data['diagnosis']
     X_val = val_data.drop(['diagnosis'], axis=1)
     y_val = val_data['diagnosis']
-    unsupervised_model = TabNetPretrainer(
-        optimizer_fn=torch.optim.Adam,
-        optimizer_params=dict(lr=pretraining_lr),
-        mask_type=mask_type
-    )
-    unsupervised_model.fit(
-        X_train=X_train.values,
-        eval_set=[X_val.values],
-        pretraining_ratio=pretraining_ratio,
-    )
+    # unsupervised_model = TabNetPretrainer(
+    #     optimizer_fn=torch.optim.Adam,
+    #     optimizer_params=dict(lr=pretraining_lr),
+    #     mask_type=mask_type
+    # )
+    # unsupervised_model.fit(
+    #     X_train=X_train.values,
+    #     eval_set=[X_val.values],
+    #     pretraining_ratio=pretraining_ratio,
+    # )
     clf = TabNetClassifier(
         optimizer_fn=torch.optim.AdamW,
         optimizer_params=dict(lr=training_lr),
@@ -190,8 +192,8 @@ def train_tabnet_model(train_path, val_path, feature_importances_path, model_sav
         eval_set=[(X_val.values, y_val.values)],
         eval_metric=['auc'],
         max_epochs=max_epochs,
-        patience=patience,
-        from_unsupervised=unsupervised_model
+        patience=patience
+        # from_unsupervised=unsupervised_model
     )
     with open(feature_importances_path, 'w') as f:
         f.write(f'{clf.feature_importances_}')
