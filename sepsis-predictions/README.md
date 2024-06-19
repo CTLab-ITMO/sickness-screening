@@ -1,4 +1,4 @@
-# Sickness-screening Library
+# Sickness-screening library
 <div>
   <a href="https://github.com/CTLab-ITMO/sickness-screening/actions" style="text-decoration:none;">
     <img src="https://img.shields.io/badge/Run%20Testing-passing-brightgreen" alt="Run Testing passing">
