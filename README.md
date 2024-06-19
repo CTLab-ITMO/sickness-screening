@@ -31,7 +31,7 @@ pip3 install sickness-screening
 ## Примеры
 Примеры использования библиотеки вы можете посмотреть в [example1](./exampleSepsis.ipynb) и [example2](./exampleSepsis_transformer.ipynb)
 ## Тестирование
-Библиотека прошла [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), сами тесты можно посмотреть [тут](sepsis-predictions/tests).
+Библиотека прошла [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), сами тесты можно посмотреть [тут](../tests).
 
 [//]: # (### Устройство MIMIC)
 
