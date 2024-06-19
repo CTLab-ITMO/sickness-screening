@@ -31,7 +31,7 @@ By default, the module is configured for a dataset [MIMIC](https://mimic.mit.edu
 ## Examples
 Examples of library usage can be found in [example1](../exampleSepsis.ipynb) and [example2](../exampleSepsis_transformer.ipynb)
 ## Testing
-The library has passed [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), you can view the tests themselves [here](./tests).
+The library has passed [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), you can view the tests themselves [here](../tests).
 
 <!-- # Sickness-screening library
 
