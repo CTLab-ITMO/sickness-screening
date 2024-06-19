@@ -29,9 +29,9 @@ After importing the module into your file, you gain the ability to interact with
 By default, the module is configured for a dataset [MIMIC](https://mimic.mit.edu/gettingstarted/cloud/) and sepsis prediction.
 
 ## Examples
-Examples of library usage can be found in [example1](././exampleSepsis.ipynb) and [example2](././exampleSepsis_transformer.ipynb)
+Examples of library usage can be found in [example1](../exampleSepsis.ipynb) and [example2](../exampleSepsis_transformer.ipynb)
 ## Testing
-The library has passed [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), you can view the tests themselves [here](sepsis-predictions/tests).
+The library has passed [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), you can view the tests themselves [here](./tests).
 
 <!-- # Sickness-screening library
 
