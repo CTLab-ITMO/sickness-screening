@@ -1,3 +1,38 @@
+# Sickness-screening Library
+<div>
+  <a href="https://github.com/CTLab-ITMO/sickness-screening/actions" style="text-decoration:none;">
+    <img src="https://img.shields.io/badge/Run%20Testing-passing-brightgreen" alt="Run Testing passing">
+  </a>
+</div>
+
+[English](sepsis-predictions/README.md)
+
+## Instruction
+
+The module allows users to interact with various medical tables. 
+It simplifies aggregation, balancing, filling empty data values associated with specific patients. 
+It also enables quick and easy access to statistics on the data, normalization, and training models based on them.
+
+### Module installation
+
+To install the module, simply use the following command:
+
+```bash
+pip install sickness-screening
+```
+Alternatively,
+```bash
+pip3 install sickness-screening
+```
+### Usage
+After importing the module into your file, you gain the ability to interact with various medical data.
+By default, the module is configured for a dataset [MIMIC](https://mimic.mit.edu/gettingstarted/cloud/) and sepsis prediction.
+
+## Examples
+Examples of library usage can be found in [example1](./exampleSepsis.ipynb) and [example2](./exampleSepsis_transformer.ipynb)
+## Testing
+The library has passed [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), you can view the tests themselves [here](sepsis-predictions/tests).
+
 <!-- # Sickness-screening library
 
 ## Instruction
