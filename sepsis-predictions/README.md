@@ -1,4 +1,4 @@
-# Sickness-screening library
+<!-- # Sickness-screening library
 
 ## Instruction
 
@@ -297,4 +297,4 @@ No patterns were found.
 
 #### A variational encoder was trained to build a separable 2D space
 ![Image alt](./Вариационный_кодировщик.png)
-We can see that they overlap and are inseparable.
+We can see that they overlap and are inseparable. -->
