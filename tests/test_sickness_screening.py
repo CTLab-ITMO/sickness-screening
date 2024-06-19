@@ -4,7 +4,7 @@ import logging
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
-from sickness_screening import (get_diagnoses_data, get_diseas_info, get_analyzes_data,
+from sickness_screening import (get_diagnoses_data, get_disease_info, get_analyzes_data,
                                 combine_data, merge_and_get_data, balance_on_patients,
                                 compress, choose, fill_values, train_model)
 import warnings
@@ -67,10 +67,10 @@ def test_get_diagnoses_data(mock_data):
     assert 'long_title' in result.columns
 
 
-def test_get_diseas_info(mock_data):
-    result = get_diseas_info(diagnoses_df=mock_data['mock_diagnoses_result'],
-                             title_column='long_title', diseas_str='sepsis',
-                             subject_id_column='subject_id', log_stats=False)
+def test_get_disease_info(mock_data):
+    result = get_disease_info(diagnoses_df=mock_data['mock_diagnoses_result'],
+                              title_column='long_title', disease_str='sepsis',
+                              subject_id_column='subject_id', log_stats=False)
     assert not result.empty
     assert 'has_sepsis' in result.columns
 
@@ -123,10 +123,10 @@ def test_balance_on_patients(mock_data):
     }
 
     result_analyzes = get_analyzes_data(analyzes_df=mock_data['mock_chartevents'],
-                               subject_id_col='subject_id', itemid_col='itemid',
-                               rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
-                                             'Temperature Fahrenheit'],
-                               itemids_map=itemids_map)
+                                        subject_id_col='subject_id', itemid_col='itemid',
+                                        rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
+                                                      'Temperature Fahrenheit'],
+                                        itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
                                second_data=result_analyzes, log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
@@ -157,10 +157,10 @@ def test_choose(mock_data):
     }
 
     result_analyzes = get_analyzes_data(analyzes_df=mock_data['mock_chartevents'],
-                               subject_id_col='subject_id', itemid_col='itemid',
-                               rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
-                                             'Temperature Fahrenheit'],
-                               itemids_map=itemids_map)
+                                        subject_id_col='subject_id', itemid_col='itemid',
+                                        rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
+                                                      'Temperature Fahrenheit'],
+                                        itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
                                second_data=result_analyzes, log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
@@ -186,10 +186,10 @@ def test_fill_values(mock_data):
     }
 
     result_analyzes = get_analyzes_data(analyzes_df=mock_data['mock_chartevents'],
-                               subject_id_col='subject_id', itemid_col='itemid',
-                               rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
-                                             'Temperature Fahrenheit'],
-                               itemids_map=itemids_map)
+                                        subject_id_col='subject_id', itemid_col='itemid',
+                                        rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
+                                                      'Temperature Fahrenheit'],
+                                        itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
                                second_data=result_analyzes, log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
@@ -217,10 +217,10 @@ def test_train_model(mock_data):
     }
 
     result_analyzes = get_analyzes_data(analyzes_df=mock_data['mock_chartevents'],
-                               subject_id_col='subject_id', itemid_col='itemid',
-                               rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
-                                             'Temperature Fahrenheit'],
-                               itemids_map=itemids_map)
+                                        subject_id_col='subject_id', itemid_col='itemid',
+                                        rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
+                                                      'Temperature Fahrenheit'],
+                                        itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
                                second_data=result_analyzes, log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
