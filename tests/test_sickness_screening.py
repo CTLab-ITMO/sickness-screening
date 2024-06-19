@@ -70,6 +70,7 @@ def test_get_diagnoses_data(mock_data):
 def test_get_disease_info(mock_data):
     result = get_disease_info(diagnoses_df=mock_data['mock_diagnoses_result'],
                               title_column='long_title', disease_str='sepsis',
+                              disease_column='has_sepsis',
                               subject_id_column='subject_id', log_stats=False)
     assert not result.empty
     assert 'has_sepsis' in result.columns
@@ -106,11 +107,11 @@ def test_combine_data(mock_data):
 
 def test_merge_and_get_data(mock_data):
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
-                               second_data=mock_data['mock_chartevents'], log_stats=False)
+                               second_data=mock_data['mock_chartevents'],disease_str='sepsis', log_stats=False)
     result = merge_and_get_data(merge_with_df=result_comb,
                                 blood_df=mock_data['mock_blood'],
                                 get_data_from_df=mock_data['mock_chartevents'],
-                                disease_info_df=mock_data['mock_sepsis_info'], log_stats=False)
+                                disease_info_df=mock_data['mock_sepsis_info'],has_disease_column='has_sepsis', log_stats=False)
     assert not result.empty
     assert 'subject_id' in result.columns
 
@@ -128,11 +129,11 @@ def test_balance_on_patients(mock_data):
                                                       'Temperature Fahrenheit'],
                                         itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
-                               second_data=result_analyzes, log_stats=False)
+                               second_data=result_analyzes, has_disease_column='has_sepsis', log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
                                       blood_df=mock_data['mock_blood'],
                                       get_data_from_df=mock_data['mock_chartevents'],
-                                      disease_info_df=mock_data['mock_sepsis_info'], log_stats=False)
+                                      disease_info_df=mock_data['mock_sepsis_info'], has_disease_column='has_sepsis', log_stats=False)
     result_balance = balance_on_patients(balancing_df=result_merge,
                                          disease_col='has_sepsis',
                                          subject_id_col='subject_id', number_of_patient_selected=1, filtering_on=1,
@@ -162,11 +163,11 @@ def test_choose(mock_data):
                                                       'Temperature Fahrenheit'],
                                         itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
-                               second_data=result_analyzes, log_stats=False)
+                               second_data=result_analyzes, has_disease_column='has_sepsis', log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
                                       blood_df=mock_data['mock_blood'],
                                       get_data_from_df=mock_data['mock_chartevents'],
-                                      disease_info_df=mock_data['mock_sepsis_info'], log_stats=False)
+                                      disease_info_df=mock_data['mock_sepsis_info'], has_disease_column='has_sepsis', log_stats=False)
     result_balance = balance_on_patients(balancing_df=result_merge,
                                          disease_col='has_sepsis',
                                          subject_id_col='subject_id', number_of_patient_selected=1, filtering_on=1,
@@ -190,12 +191,12 @@ def test_fill_values(mock_data):
                                         rest_columns=['subject_id', 'charttime', 'Heart rate', 'Respiratory rate',
                                                       'Temperature Fahrenheit'],
                                         itemids_map=itemids_map)
-    result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
+    result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'], has_disease_column='has_sepsis',
                                second_data=result_analyzes, log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
                                       blood_df=mock_data['mock_blood'],
                                       get_data_from_df=mock_data['mock_chartevents'],
-                                      disease_info_df=mock_data['mock_sepsis_info'], log_stats=False)
+                                      disease_info_df=mock_data['mock_sepsis_info'], has_disease_column='has_sepsis', log_stats=False)
     result_balance = balance_on_patients(balancing_df=result_merge,
                                          disease_col='has_sepsis',
                                          subject_id_col='subject_id', number_of_patient_selected=1, filtering_on=1,
@@ -222,10 +223,12 @@ def test_train_model(mock_data):
                                                       'Temperature Fahrenheit'],
                                         itemids_map=itemids_map)
     result_comb = combine_data(first_data=mock_data['mock_diagnoses_result'],
+                               has_disease_column='has_sepsis',
                                second_data=result_analyzes, log_stats=False)
     result_merge = merge_and_get_data(merge_with_df=result_comb,
                                       blood_df=mock_data['mock_blood'],
                                       get_data_from_df=mock_data['mock_chartevents'],
+                                      has_disease_column='has_sepsis',
                                       disease_info_df=mock_data['mock_sepsis_info'], log_stats=False)
     result_balance = balance_on_patients(balancing_df=result_merge,
                                          disease_col='has_sepsis',
