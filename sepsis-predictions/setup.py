@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='sickness_screening',
-    version='1.0.12',
+    version='1.0.17',
     author='@Margo78, @akp1n',
     author_email='timtimk30@yandex.ru',
     description='Module for sepsis predictions',

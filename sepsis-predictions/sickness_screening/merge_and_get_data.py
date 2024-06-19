@@ -4,13 +4,12 @@ import pandas as pd
 def merge_and_get_data(analyzes_names=None, merge_with_df=None, merge_with='diagnoses_and_ssir.csv',
                        blood_df=None, blood_csv='labevents.csv', get_data_from_df=None, get_data_from='chartevents.csv',
                        output_csv=None, subject_id_column='subject_id', time_column='charttime', itemid_column='itemid',
-                       has_sepsis_column='has_sepsis', log_stats=True, sepsis_info_df=None,
-                       sepsis_info_csv='sepsis_info_df.csv',
+                       has_disease_column='has_disease', log_stats=True, disease_info_df=None,
+                       disease_info_csv='disease_info_df.csv',
                        valueuom_column='valueuom'):
     """
-    Merges diagnoses and SSIR data with blood and chartevents data, and logs statistics about sepsis patients.
-    It is recommended to get the file diagnoses_and_ssir by get_diagnoses and merge_diagnoses_and_ssir. 'sepsis_info_df' is recommended to be a path
-    to a .csv file after 'get_disease_info' function.
+    Merges diagnoses and SSIR data with blood and chartevents data, and logs statistics about patients with a specified disease.
+    It is recommended to get the file diagnoses_and_ssir by get_diagnoses and merge_diagnoses_and_ssir.
 
     Args:
         analyzes_names (dict, optional): Dictionary mapping item IDs to analysis names. Default is None, in which case a predefined dictionary is used.
@@ -24,10 +23,10 @@ def merge_and_get_data(analyzes_names=None, merge_with_df=None, merge_with='diag
         subject_id_column (str): Column name for subject IDs. Default is 'subject_id'.
         time_column (str): Column name for chart times. Default is 'charttime'.
         itemid_column (str): Column name for item IDs. Default is 'itemid'.
-        has_sepsis_column (str): Column name to indicate sepsis presence. Default is 'has_sepsis'.
-        log_stats (bool): Whether to log statistics about sepsis patients. Default is True.
-        sepsis_info_df (pd.DataFrame, optional): DataFrame containing sepsis information. Default is None.
-        sepsis_info_csv (str, optional): Path to the CSV file containing sepsis information. Default is 'sepsis_info_df.csv'.
+        has_disease_column (str): Column name to indicate disease presence. Default is 'has_disease'.
+        log_stats (bool): Whether to log statistics about disease patients. Default is True.
+        disease_info_df (pd.DataFrame, optional): DataFrame containing disease information. Default is None.
+        disease_info_csv (str, optional): Path to the CSV file containing disease information. Default is 'disease_info_df.csv'.
         valueuom_column (str): Column name for value units of measurement. Default is 'valueuom'.
 
     Returns:
@@ -82,12 +81,12 @@ def merge_and_get_data(analyzes_names=None, merge_with_df=None, merge_with='diag
     else:
         raise ValueError("Either get_data_from_df or get_data_from must be provided.")
 
-    if sepsis_info_df is None and sepsis_info_csv is not None:
-        sepsis_info = pd.read_csv(sepsis_info_csv)
-    elif sepsis_info_df is not None:
-        sepsis_info = sepsis_info_df
+    if disease_info_df is None and disease_info_csv is not None:
+        disease_info = pd.read_csv(disease_info_csv)
+    elif disease_info_df is not None:
+        disease_info = disease_info_df
     else:
-        raise ValueError("Either sepsis_info_df or sepsis_info_csv must be provided.")
+        raise ValueError("Either disease_info_df or disease_info_csv must be provided.")
 
     blood['analysis_name'] = blood[itemid_column].map(analyzes_names)
     pivot_values_blood = blood.pivot_table(index=[subject_id_column, time_column], columns='analysis_name',
@@ -110,32 +109,31 @@ def merge_and_get_data(analyzes_names=None, merge_with_df=None, merge_with='diag
     pivot_df = pd.merge(pivot_values, pivot_uom, on=[subject_id_column, time_column], how='left')
     merged_df = pd.merge(pivot_df, diagnoses_and_ssir, on=[subject_id_column, time_column], how='outer')
 
-    sepsis_map = sepsis_info.set_index(subject_id_column)[has_sepsis_column].to_dict()
-    merged_df[has_sepsis_column] = merged_df[subject_id_column].map(sepsis_map)
-    unique_patients = merged_df[[subject_id_column, has_sepsis_column]].drop_duplicates()
-    grouped_sepsis = unique_patients.groupby(subject_id_column)[has_sepsis_column].agg(['min', 'max'])
-    ambiguous_sepsis_patients = grouped_sepsis[grouped_sepsis['min'] != grouped_sepsis['max']].index
-    merged_df.loc[merged_df[subject_id_column].isin(ambiguous_sepsis_patients), has_sepsis_column] = False
+    disease_map = disease_info.set_index(subject_id_column)[has_disease_column].to_dict()
+    merged_df[has_disease_column] = merged_df[subject_id_column].map(disease_map)
+    unique_patients = merged_df[[subject_id_column, has_disease_column]].drop_duplicates()
+    grouped_disease = unique_patients.groupby(subject_id_column)[has_disease_column].agg(['min', 'max'])
+    ambiguous_disease_patients = grouped_disease[grouped_disease['min'] != grouped_disease['max']].index
+    merged_df.loc[merged_df[subject_id_column].isin(ambiguous_disease_patients), has_disease_column] = merged_df[
+        merged_df[subject_id_column].isin(ambiguous_disease_patients)][has_disease_column].map(
+        lambda x: False if x == True else x)
 
     if output_csv is not None:
         merged_df.to_csv(output_csv, index=False)
 
     if log_stats:
-        sepsis_counts = unique_patients[has_sepsis_column].value_counts(normalize=False)
-        count_with_sepsis = sepsis_counts.get(True, 0)
-        count_without_sepsis = sepsis_counts.get(False, 0)
-        ambiguous_sepsis_patients = grouped_sepsis[grouped_sepsis['min'] != grouped_sepsis['max']]
-        count_ambiguous_sepsis = len(ambiguous_sepsis_patients)
-        print(f'Unique patients with sepsis: {count_with_sepsis}')
-        print(f'Unique patients without sepsis: {count_without_sepsis}')
-        print(f'Patients with both sepsis and no sepsis records: {count_ambiguous_sepsis}')
-        print(f'Total unique patients: {len(grouped_sepsis)}')
+        disease_counts = unique_patients[has_disease_column].value_counts(normalize=False)
+        count_with_disease = disease_counts.get(True, 0)
+        count_without_disease = disease_counts.get(False, 0)
+        print(f'Unique patients with disease: {count_with_disease}')
+        print(f'Unique patients without disease: {count_without_disease}')
+        print(f'Total unique patients: {len(grouped_disease)}')
 
     return merged_df
 
 # df_merge_with = pd.read_csv('diagnoses_and_ssir.csv')
 # df_blood = pd.read_csv('labevents.csv')
 # df_chartevents = pd.read_csv('chartevents.csv')
-# df_sepsis_info = pd.read_csv('sepsis_info_df.csv')
-# result_df = merge_and_get_data(merge_with_df=df_merge_with, blood_df=df_blood, get_data_from_df=df_chartevents, sepsis_info_df=df_sepsis_info)
+# df_disease_info = pd.read_csv('disease_info_df.csv')
+# result_df = merge_and_get_data(merge_with_df=df_merge_with, blood_df=df_blood, get_data_from_df=df_chartevents, disease_info_df=df_disease_info)
 # result_df.to_csv('diagnoses_and_ssir_and_blood_and_chartevents.csv', index=False)

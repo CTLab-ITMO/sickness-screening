@@ -2,7 +2,7 @@ import pandas as pd
 import warnings
 from .get_diagnoses_data import get_diagnoses_data
 from .get_analyzes_data import get_analyzes_data
-from .get_disease_info import get_diseas_info
+from .get_disease_info import get_disease_info
 from .balance_on_patients import balance_on_patients
 from .choose import choose
 from .combine_data import combine_data
