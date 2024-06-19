@@ -5,8 +5,6 @@
   </a>
 </div>
 
-[English](sepsis-predictions/README.md)
-
 ## Instruction
 
 The module allows users to interact with various medical tables. 
