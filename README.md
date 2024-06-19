@@ -29,7 +29,7 @@ pip3 install sickness-screening
 По умолчанию модуль настроен на набор данных [MIMIC](https://mimic.mit.edu/gettingstarted/cloud/) и предсказание сепсиса. 
 
 ## Примеры
-Пример использования библиотеки вы можете посмотреть в [colab](./exampleSepsis.ipynb)
+Примеры использования библиотеки вы можете посмотреть в [example1](./exampleSepsis.ipynb) и [example2](./exampleSepsis_transformer.ipynb)
 ## Тестирование
 Библиотека прошла [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions), сами тесты можно посмотреть [тут](sepsis-predictions/tests).
 
