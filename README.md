@@ -1,4 +1,10 @@
-# Модуль Disease-predictions  
+# Библиотека Sickness-screening
+<div>
+  <a href="https://github.com/CTLab-ITMO/sickness-screening/actions" style="text-decoration:none;">
+    <img src="https://img.shields.io/badge/Run%20Testing-passing-brightgreen" alt="Run Testing passing">
+  </a>
+</div>
+
 [English](sepsis-predictions/README.md)
 
 ## Инструкция
@@ -25,8 +31,7 @@ pip3 install sickness-screening
 ## Примеры
 Пример использования библиотеки вы можете посмотреть в [colab](./exampleSepsis.ipynb)
 ## Тестирование
-Библиотека прошла тестирование, сами тесты можно посмотреть [тут](sepsis-predictions/tests). 
-![](./completedTests.png)
+Библиотека прошла [тестирование](https://github.com/CTLab-ITMO/sickness-screening/actions/new), сами тесты можно посмотреть [тут](sepsis-predictions/tests).
 
 [//]: # (### Устройство MIMIC)
 

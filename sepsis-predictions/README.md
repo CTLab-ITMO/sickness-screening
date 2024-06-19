@@ -1,4 +1,4 @@
-# Disease-predictions module
+# Sickness-screening library
 
 ## Instruction
 
